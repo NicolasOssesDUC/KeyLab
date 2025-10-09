@@ -1,0 +1,42 @@
+[
+    {
+        "region": "Región Metropolitana de Santiago",
+        "comunas": [
+            "Santiago",
+            "Providencia",
+            "Las Condes",
+            "La Florida",
+            "Maipú",
+            "Puente Alto"
+        ]
+    },
+    {
+        "region": "Región de Valparaíso",
+        "comunas": [
+            "Valparaíso",
+            "Viña del Mar",
+            "Quilpué",
+            "Concón",
+            "Villa Alemana"
+        ]
+    },
+    {
+        "region": "Región del Biobío",
+        "comunas": [
+            "Concepción",
+            "Talcahuano",
+            "San Pedro de la Paz",
+            "Chiguayante",
+            "Hualpén"
+        ]
+    },
+    {
+        "region": "Región de La Araucanía",
+        "comunas": [
+            "Temuco",
+            "Padre Las Casas",
+            "Villarrica",
+            "Pucón"
+        ]
+    }
+]
