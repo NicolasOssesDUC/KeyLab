@@ -12,6 +12,7 @@ import Nosotros from './pages/Nosotros';
 import Ubicacion from './pages/Ubicacion';
 import Login from './pages/Login';
 import Carrito from './pages/Carrito';
+import PerfilUsuario from './pages/PerfilUsuario';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -31,6 +32,7 @@ function App() {
         <Route path="/ubicacion" element={<Ubicacion />} />
         <Route path="/login" element={<Login />} />
         <Route path="/carrito" element={<Carrito />} />
+        <Route path="/perfil/:nombreUsuario" element={<PerfilUsuario />} />
       </Routes>
       <Footer />
     </BrowserRouter>
