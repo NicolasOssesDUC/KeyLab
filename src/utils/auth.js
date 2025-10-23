@@ -25,7 +25,7 @@ export function seedAdminUser() {
     }
 
     window.localStorage.setItem('usuarios', JSON.stringify([DEFAULT_ADMIN_USER]));
-  } catch (error) {
+  } catch {
     // Si localStorage devuelve un valor inválido, reiniciamos con el admin por defecto.
     window.localStorage.setItem('usuarios', JSON.stringify([DEFAULT_ADMIN_USER]));
   }

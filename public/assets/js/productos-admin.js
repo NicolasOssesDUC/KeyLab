@@ -8,6 +8,7 @@ function guardarProductos(listaProductos) {
     localStorage.setItem('productos', JSON.stringify(listaProductos));
 }
 
+// eslint-disable-next-line no-unused-vars
 function guardarNuevoProducto() {
     const nombre = document.getElementById('nombre').value.trim();
     const categoria = document.getElementById('categoria').value;

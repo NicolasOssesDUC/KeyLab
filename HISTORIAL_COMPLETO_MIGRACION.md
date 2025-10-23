@@ -15,10 +15,9 @@
 - Página Home con carrusel funcional
 - Página Login con validaciones
 - Sistema de autenticación básico
-- **Wrappers UI:** Button, Layout (Container/Row/Col)
+- **Wrappers UI:** Button, Layout (Container/Row/Col), Card, FormField, Alert, Table
 
 ### 🟡 En Progreso
-- Creación de wrappers para componentes Bootstrap
 - Migración de páginas de productos
 
 ### ⏳ Pendiente
@@ -395,6 +394,478 @@ if (colClasses.length === 0) {
 
 ---
 
+#### ✅ Paso 3: Card.jsx (Familia completa)
+**Fecha:** 23 de Octubre 2024  
+**Ubicación:** `src/ui/Card.jsx`
+
+**Objetivo:**
+Crear componentes de tarjetas (cards) modulares para mostrar productos, información y formularios.
+
+**Componentes exportados:**
+
+##### 1. Card (Contenedor principal)
+**Props:**
+- `shadow` (boolean, default: false): Añade sombra sutil
+- `className` (string): Clases adicionales
+- `children` (ReactNode): Contenido de la card
+
+##### 2. CardHeader (Encabezado)
+**Props:**
+- `className` (string): Clases adicionales
+- `children` (ReactNode): Contenido del header
+
+##### 3. CardBody (Cuerpo con padding)
+**Props:**
+- `className` (string): Clases adicionales
+- `children` (ReactNode): Contenido principal
+
+##### 4. CardTitle (Título)
+**Props:**
+- `as` (string, default: 'h5'): Elemento HTML a renderizar
+- `className` (string): Clases adicionales
+- `children` (ReactNode): Texto del título
+
+##### 5. CardText (Párrafo de texto)
+**Props:**
+- `className` (string): Clases adicionales
+- `children` (ReactNode): Contenido del texto
+
+##### 6. CardFooter (Pie de página)
+**Props:**
+- `className` (string): Clases adicionales
+- `children` (ReactNode): Contenido del footer
+
+##### 7. CardImg (Imagen)
+**Props:**
+- `variant` (string, default: 'top'): Posición de la imagen (top/bottom)
+- `src` (string): URL de la imagen
+- `alt` (string): Texto alternativo
+- `className` (string): Clases adicionales
+
+**Ejemplos de uso:**
+
+```jsx
+// Card simple
+<Card>
+  <CardBody>
+    <CardTitle>Título</CardTitle>
+    <CardText>Contenido</CardText>
+  </CardBody>
+</Card>
+
+// Card completa con imagen
+<Card shadow>
+  <CardImg variant="top" src="/img/producto.jpg" alt="Producto" />
+  <CardBody>
+    <CardTitle>Teclado Mecánico</CardTitle>
+    <CardText>Descripción del producto...</CardText>
+    <Button variant="primary">Ver más</Button>
+  </CardBody>
+  <CardFooter>
+    <small className="text-muted">$150.000</small>
+  </CardFooter>
+</Card>
+
+// Card con header personalizado
+<Card>
+  <CardHeader className="bg-primary text-white">
+    Información Importante
+  </CardHeader>
+  <CardBody>
+    <CardText>Contenido de la card...</CardText>
+  </CardBody>
+</Card>
+```
+
+**Características técnicas:**
+- ✅ Todos usan `forwardRef`
+- ✅ Composición modular (usar solo las partes necesarias)
+- ✅ Clases Bootstrap: card, card-header, card-body, card-title, card-text, card-footer, card-img-*
+- ✅ `CardTitle` permite cambiar elemento HTML con prop `as`
+- ✅ `CardImg` soporta variant para posición
+
+**Página de prueba:**
+- Ruta: `/test-card`
+- Archivo: `src/pages/TestCard.jsx`
+
+---
+
+#### ✅ Paso 4: FormField.jsx (Campos de formulario universales)
+**Fecha:** 23 de Octubre 2024  
+**Ubicación:** `src/ui/FormField.jsx`
+
+**Objetivo:**
+Crear un componente universal para todos los tipos de inputs con validación integrada.
+
+**Props principales:**
+
+| Prop | Tipo | Default | Descripción |
+|------|------|---------|-------------|
+| `id` | string | - | ID del input |
+| `name` | string | - | Nombre del input |
+| `label` | string | - | Etiqueta del campo |
+| `type` | string | 'text' | Tipo: text, email, password, checkbox, radio, etc. |
+| `as` | string | 'input' | Elemento: input, select, textarea |
+| `options` | array | [] | Opciones para select (string[] o {value, label}[]) |
+| `helperText` | string | - | Texto de ayuda debajo del input |
+| `error` | string | - | Mensaje de error |
+| `isInvalid` | boolean | false | Estado inválido |
+| `isValid` | boolean | false | Estado válido |
+| `floating` | boolean | false | Labels flotantes |
+| `inline` | boolean | false | Checkboxes/radios inline |
+| `plaintext` | boolean | false | Renderizar como texto plano |
+| `required` | boolean | false | Campo requerido |
+
+**Tipos soportados:**
+1. **Inputs de texto:** text, email, password, number, date, etc.
+2. **Textarea:** con prop `as="textarea"`
+3. **Select:** con prop `as="select"` + `options`
+4. **Checkbox/Radio:** con prop `type="checkbox"` o `type="radio"`
+
+**Ejemplos de uso:**
+
+```jsx
+// Input de texto simple
+<FormField
+  id="username"
+  name="username"
+  label="Nombre de usuario"
+  type="text"
+  required
+/>
+
+// Input con error
+<FormField
+  id="email"
+  name="email"
+  label="Correo electrónico"
+  type="email"
+  error="Email inválido"
+  isInvalid
+/>
+
+// Input con helper text
+<FormField
+  id="password"
+  name="password"
+  label="Contraseña"
+  type="password"
+  helperText="Mínimo 8 caracteres"
+/>
+
+// Select con opciones
+<FormField
+  id="category"
+  name="category"
+  label="Categoría"
+  as="select"
+  options={['Teclados', 'Keycaps', 'Switches']}
+/>
+
+// Select con objetos
+<FormField
+  as="select"
+  options={[
+    { value: 'teclados', label: 'Teclados Mecánicos' },
+    { value: 'keycaps', label: 'Keycaps Custom' }
+  ]}
+/>
+
+// Textarea
+<FormField
+  id="description"
+  name="description"
+  label="Descripción"
+  as="textarea"
+  rows={4}
+/>
+
+// Checkbox
+<FormField
+  id="terms"
+  name="terms"
+  label="Acepto términos y condiciones"
+  type="checkbox"
+/>
+
+// Radio buttons inline
+<FormField
+  id="gender-male"
+  name="gender"
+  label="Masculino"
+  type="radio"
+  value="male"
+  inline
+/>
+
+// Floating labels
+<FormField
+  id="email"
+  name="email"
+  label="Correo electrónico"
+  type="email"
+  floating
+/>
+```
+
+**Características técnicas:**
+- ✅ Usa `forwardRef` (compatible con react-hook-form)
+- ✅ Lógica inteligente para clases según tipo
+- ✅ Soporta validación visual (is-invalid, is-valid)
+- ✅ Helper text y mensajes de error
+- ✅ Floating labels de Bootstrap 5
+- ✅ Checkboxes y radios inline
+- ✅ Plaintext para formularios read-only
+- ✅ Spread operator para props HTML nativas
+
+**Función auxiliar `getControlClasses`:**
+```jsx
+// Determina la clase CSS según el tipo de input
+plaintext → 'form-control-plaintext'
+checkbox/radio → 'form-check-input'
+select → 'form-select'
+default → 'form-control'
+```
+
+**Función auxiliar `getWrapperClasses`:**
+```jsx
+// Determina el wrapper según el tipo
+floating → 'form-floating'
+checkbox/radio → 'form-check' + opcional 'form-check-inline'
+default → 'mb-3' (margin-bottom)
+```
+
+---
+
+#### ✅ Paso 5: Alert.jsx (Mensajes de feedback)
+**Fecha:** 23 de Octubre 2024  
+**Ubicación:** `src/ui/Alert.jsx`
+
+**Objetivo:**
+Crear componente de alertas para mensajes de éxito, error, advertencia e información.
+
+**Props:**
+
+| Prop | Tipo | Default | Descripción |
+|------|------|---------|-------------|
+| `variant` | string | 'primary' | Color: primary, secondary, success, danger, warning, info, light, dark |
+| `dismissible` | boolean | false | Permite cerrar la alerta |
+| `heading` | string | - | Encabezado de la alerta |
+| `onClose` | function | - | Callback al cerrar |
+| `show` | boolean | - | Control externo de visibilidad |
+| `className` | string | '' | Clases adicionales |
+| `closeLabel` | string | 'Close' | Texto del botón cerrar (accesibilidad) |
+| `children` | ReactNode | - | Contenido de la alerta |
+
+**Variantes disponibles:**
+```jsx
+VARIANTS = {
+  primary: 'alert-primary',      // Azul
+  secondary: 'alert-secondary',  // Gris
+  success: 'alert-success',      // Verde
+  danger: 'alert-danger',        // Rojo
+  warning: 'alert-warning',      // Amarillo
+  info: 'alert-info',            // Celeste
+  light: 'alert-light',          // Claro
+  dark: 'alert-dark'             // Oscuro
+}
+```
+
+**Modos de operación:**
+
+1. **No controlado (por defecto):**
+   - Maneja su propia visibilidad con `useState`
+   - Al cerrar, desaparece automáticamente
+
+2. **Controlado:**
+   - Prop `show` controla visibilidad desde el padre
+   - `onClose` notifica al padre para cambiar `show`
+
+**Ejemplos de uso:**
+
+```jsx
+// Alerta simple
+<Alert variant="success">
+  ¡Operación exitosa!
+</Alert>
+
+// Alerta con encabezado
+<Alert variant="danger" heading="Error">
+  No se pudo completar la operación.
+</Alert>
+
+// Alerta dismissible (no controlada)
+<Alert variant="warning" dismissible>
+  Esta es una advertencia que puedes cerrar.
+</Alert>
+
+// Alerta dismissible (controlada)
+const [showAlert, setShowAlert] = useState(true);
+
+<Alert 
+  variant="info" 
+  dismissible 
+  show={showAlert}
+  onClose={() => setShowAlert(false)}
+>
+  Mensaje controlado por el padre.
+</Alert>
+
+// Alerta con contenido HTML
+<Alert variant="primary">
+  <strong>Nota:</strong> Esto es un mensaje importante.
+  <hr />
+  <p className="mb-0">Más detalles aquí...</p>
+</Alert>
+```
+
+**Características técnicas:**
+- ✅ Control de visibilidad interno (no controlado) o externo (controlado)
+- ✅ `useState` para estado interno
+- ✅ Callback `onClose` opcional
+- ✅ Clases Bootstrap: alert, alert-*, alert-dismissible, fade, show
+- ✅ Botón de cierre con `btn-close`
+- ✅ Atributo `role="alert"` para accesibilidad
+- ✅ Encabezado con clase `alert-heading`
+
+**Lógica de visibilidad:**
+```jsx
+const isControlled = controlledShow !== undefined;
+const isVisible = isControlled ? controlledShow : uncontrolledShow;
+
+if (!isVisible) return null;
+```
+
+---
+
+#### ✅ Paso 6: Table.jsx (Tablas de datos)
+**Fecha:** 23 de Octubre 2024  
+**Ubicación:** `src/ui/Table.jsx`
+
+**Objetivo:**
+Crear componentes de tabla modulares para listados de datos en el admin panel.
+
+**Componentes exportados:**
+
+##### 1. Table (Contenedor principal)
+**Props:**
+
+| Prop | Tipo | Default | Descripción |
+|------|------|---------|-------------|
+| `striped` | boolean/string | false | Filas rayadas: true o 'columns' |
+| `hover` | boolean | false | Efecto hover en filas |
+| `bordered` | boolean | false | Bordes en todas las celdas |
+| `borderless` | boolean | false | Sin bordes |
+| `size` | string | - | Tamaño: 'sm' para tabla compacta |
+| `variant` | string | - | Color de fondo: 'dark', 'light', etc. |
+| `responsive` | boolean/string | false | Wrapper responsive: true o breakpoint ('sm', 'md', 'lg', 'xl', 'xxl') |
+| `className` | string | '' | Clases adicionales |
+
+##### 2. TableHead (Encabezado)
+**Props:** `className`, `children`
+
+##### 3. TableBody (Cuerpo)
+**Props:** `className`, `children`
+
+##### 4. TableFoot (Pie de tabla)
+**Props:** `className`, `children`
+
+##### 5. TableRow (Fila)
+**Props:** `className`, `children`
+
+##### 6. TableCell (Celda)
+**Props:**
+- `as` (string): Elemento a renderizar: 'td' o 'th'
+- `scope` (string): Scope para headers: 'row', 'col'
+- `className` (string): Clases adicionales
+
+**Ejemplos de uso:**
+
+```jsx
+// Tabla simple
+<Table>
+  <TableHead>
+    <TableRow>
+      <TableCell as="th">ID</TableCell>
+      <TableCell as="th">Nombre</TableCell>
+      <TableCell as="th">Precio</TableCell>
+    </TableRow>
+  </TableHead>
+  <TableBody>
+    <TableRow>
+      <TableCell>1</TableCell>
+      <TableCell>Teclado</TableCell>
+      <TableCell>$150.000</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
+
+// Tabla con todas las características
+<Table striped hover bordered size="sm" responsive>
+  <TableHead>
+    <TableRow>
+      <TableCell as="th" scope="col">#</TableCell>
+      <TableCell as="th" scope="col">Producto</TableCell>
+      <TableCell as="th" scope="col">Stock</TableCell>
+      <TableCell as="th" scope="col">Acciones</TableCell>
+    </TableRow>
+  </TableHead>
+  <TableBody>
+    {productos.map((p, i) => (
+      <TableRow key={p.id}>
+        <TableCell as="th" scope="row">{i + 1}</TableCell>
+        <TableCell>{p.nombre}</TableCell>
+        <TableCell>{p.stock}</TableCell>
+        <TableCell>
+          <Button size="sm" variant="primary">Editar</Button>
+        </TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+
+// Tabla responsive solo en móvil
+<Table responsive="sm">
+  {/* contenido */}
+</Table>
+
+// Tabla con footer
+<Table>
+  <TableHead>...</TableHead>
+  <TableBody>...</TableBody>
+  <TableFoot>
+    <TableRow>
+      <TableCell colSpan={2}>Total</TableCell>
+      <TableCell>$450.000</TableCell>
+    </TableRow>
+  </TableFoot>
+</Table>
+```
+
+**Características técnicas:**
+- ✅ Función `getTableClasses` construye clases dinámicamente
+- ✅ Función `wrapResponsive` envuelve en div si es necesaria
+- ✅ `TableCell` usa `forwardRef` y soporta `as="th"` o `as="td"`
+- ✅ Props HTML nativas se pasan con spread operator
+- ✅ Soporte completo para striped, hover, bordered, borderless
+- ✅ Responsive con breakpoints específicos
+
+**Clases Bootstrap generadas:**
+```jsx
+table                  // Base
+table-striped          // Filas rayadas
+table-striped-columns  // Columnas rayadas
+table-hover            // Efecto hover
+table-bordered         // Con bordes
+table-borderless       // Sin bordes
+table-sm               // Compacta
+table-dark / table-*   // Variantes de color
+table-responsive       // Wrapper responsive
+table-responsive-sm    // Responsive solo en breakpoint
+```
+
+---
+
 ## 📁 Estructura Actual del Proyecto
 
 ```
@@ -431,7 +902,12 @@ KeyLab/
 │   │   └── TestLayout.jsx         # ✅ Página de pruebas
 │   ├── ui/                        # 🎯 Wrappers de Bootstrap
 │   │   ├── Button.jsx             # ✅ Completado
-│   │   └── Layout.jsx             # ✅ Completado (Container/Row/Col)
+│   │   ├── Layout.jsx             # ✅ Completado (Container/Row/Col)
+│   │   ├── Card.jsx               # ✅ Completado (Card, CardHeader, CardBody, etc.)
+│   │   ├── FormField.jsx          # ✅ Completado (input, select, textarea, checkbox, radio)
+│   │   ├── Alert.jsx              # ✅ Completado (alertas con todas las variantes)
+│   │   ├── Table.jsx              # ✅ Completado (Table, TableHead, TableBody, etc.)
+│   │   └── index.js               # ✅ Exportaciones centralizadas
 │   ├── utils/
 │   │   └── auth.js                # ✅ Autenticación básica
 │   ├── App.jsx                    # ✅ Router principal
@@ -537,50 +1013,42 @@ npm run test
 
 ### 🔴 Prioridad Alta (Integrante A)
 
-#### Completar Wrappers UI Base
-1. **Card.jsx** (Card, CardHeader, CardBody, CardTitle, CardText, CardFooter, CardImg)
-   - Para mostrar productos
-   - Para formularios en Login/Registro
-   - Para el dashboard admin
+#### ✅ Wrappers UI Base Completados
+1. ✅ **Button.jsx** - Botones con variantes, tamaños y estados
+2. ✅ **Layout.jsx** - Container, Row, Col para sistema de grillas
+3. ✅ **Card.jsx** - Familia completa de componentes de tarjetas
+4. ✅ **FormField.jsx** - Input universal para formularios
+5. ✅ **Alert.jsx** - Alertas dismissibles con todas las variantes
+6. ✅ **Table.jsx** - Tablas con todas las características de Bootstrap
 
-2. **FormField.jsx** (FormField, FormCheck)
-   - Inputs de texto, email, password
-   - Textareas
-   - Selects con options
-   - Checkboxes y radios
-   - Manejo de errores y helper text
-   - Soporte para `forwardRef` (react-hook-form)
-
-3. **Alert.jsx**
-   - Variantes: success, danger, warning, info
-   - Dismissible
-   - Para mensajes de feedback
-
-4. **Table.jsx** (Table, TableHead, TableBody, TableRow, TableCell)
-   - Para listados en admin
-   - Variantes: striped, hover, bordered
-   - Responsive wrapper
-
-5. **Badge.jsx**
+#### ⏳ Wrappers Pendientes
+1. **Badge.jsx**
    - Para etiquetas de estado
    - Para categorías de productos
 
-6. **Navigation.jsx** (Navbar, Nav, NavDropdown, NavItem, NavLink)
+2. **Navigation.jsx** (Navbar, Nav, NavDropdown, NavItem, NavLink)
    - Reemplazar react-bootstrap en Navbar.jsx actual
    - Sistema de navegación completo
    - Dropdown sin dependencias externas
 
+3. **Modal.jsx**
+   - Para diálogos y confirmaciones
+   - Formularios en modal
+
+4. **Pagination.jsx**
+   - Para paginación de productos/listados
+
 #### Actualizar Navbar
-7. Migrar `src/components/Navbar.jsx` para usar los nuevos wrappers en lugar de react-bootstrap
-8. Verificar que el menú responsive siga funcionando
-9. Mantener el contador del carrito funcional
+5. Migrar `src/components/Navbar.jsx` para usar los nuevos wrappers en lugar de react-bootstrap
+6. Verificar que el menú responsive siga funcionando
+7. Mantener el contador del carrito funcional
 
 #### Documentación
-10. Crear `src/ui/README.md` con:
+8. Crear `src/ui/README.md` con:
     - Propósito de cada componente
     - Tabla de props
     - Ejemplos de uso
-    - Lista de componentes pendientes (Modal, Pagination, etc.)
+    - Lista de componentes pendientes
 
 ### 🟡 Prioridad Media (Integrante B)
 
@@ -724,16 +1192,18 @@ npm run test
 ## 🎯 Métricas de Progreso
 
 ### Componentes UI Wrappers
-- ✅ Button (2/8) - 25%
-- ✅ Layout (Container, Row, Col) (2/8) - 25%
-- ⏳ Card (0/8)
-- ⏳ FormField (0/8)
-- ⏳ Alert (0/8)
-- ⏳ Table (0/8)
-- ⏳ Badge (0/8)
-- ⏳ Navigation (0/8)
+- ✅ Button (6/10) - 10%
+- ✅ Layout (Container, Row, Col) (6/10) - 10%
+- ✅ Card (6/10) - 10%
+- ✅ FormField (6/10) - 10%
+- ✅ Alert (6/10) - 10%
+- ✅ Table (6/10) - 10%
+- ⏳ Badge (0/10)
+- ⏳ Navigation (0/10)
+- ⏳ Modal (0/10)
+- ⏳ Pagination (0/10)
 
-**Total Wrappers: 25% completado** (2 de 8)
+**Total Wrappers: 60% completado** (6 de 10)
 
 ### Páginas
 - ✅ Home (1/13) - 8%
@@ -780,6 +1250,6 @@ Una aplicación React moderna, mantenible y escalable que:
 
 ---
 
-**Última actualización:** 21 de Octubre 2024  
-**Próximo paso:** Crear Card.jsx y FormField.jsx  
-**Responsable actual:** Integrante A (Wrappers UI)
+**Última actualización:** 23 de Octubre 2024  
+**Próximo paso:** Crear Badge.jsx, Navigation.jsx, Modal.jsx y migrar páginas de productos  
+**Responsable actual:** Integrantes A, B y C (Wrappers pendientes + Migración de páginas)

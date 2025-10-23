@@ -74,7 +74,7 @@ function validateSingleField(field) {
 
     switch (field.id) {
         case 'email':
-        case 'email-registro':
+        case 'email-registro': {
             const emailValue = field.value.trim();
             const allowedDomains = ['duoc.cl', 'profesor.duoc.cl', 'gmail.com', 'keylab.cl'];
             if (emailValue === '') {
@@ -91,9 +91,10 @@ function validateSingleField(field) {
                 }
             }
             break;
+        }
 
         case 'password':
-        case 'password-registro':
+        case 'password-registro': {
             const passwordValue = field.value.trim();
             if (passwordValue === '') {
                 message = 'La contraseña es requerida.';
@@ -103,8 +104,9 @@ function validateSingleField(field) {
                 isValid = false;
             }
             break;
+        }
 
-        case 'password-confirm':
+        case 'password-confirm': {
             const confirmValue = field.value.trim();
             const originalPassword = document.getElementById('password-registro').value.trim();
             if (confirmValue === '') {
@@ -115,8 +117,9 @@ function validateSingleField(field) {
                 isValid = false;
             }
             break;
+        }
 
-        case 'run':
+        case 'run': {
             const runValue = field.value.trim();
             const runRegex = /^[0-9]{1,8}-[0-9kK]{1}$/;
             if (runValue === '') {
