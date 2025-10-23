@@ -58,11 +58,12 @@ CardBody.displayName = 'CardBody';
 
 // CardTitle Component - Título (por defecto h5)
 export const CardTitle = forwardRef(({
-  as: Component = 'h5',
+  as,
   className = '',
   children,
   ...rest
 }, ref) => {
+  const Component = as || 'h5';
   const classes = ['card-title', className].filter(Boolean).join(' ');
 
   return (

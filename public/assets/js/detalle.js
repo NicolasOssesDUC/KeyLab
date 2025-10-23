@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 2. Buscar el producto 
-    const productosParaBuscar = JSON.parse(localStorage.getItem('productos')) || productos;
+    const productosParaBuscar = JSON.parse(localStorage.getItem('productos')) || [];
     const producto = productosParaBuscar.find(p => p.id === productoId);
 
     // 3. Si el producto no se encuentra, mostrar un mensaje
