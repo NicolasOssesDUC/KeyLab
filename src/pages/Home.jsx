@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Container, Row, Col, Card, CardBody, CardTitle, CardImg, Button } from '../ui';
+
+
 
 function Home() {
   const [currentImage, setCurrentImage] = useState(0);
@@ -30,36 +33,33 @@ function Home() {
   };
 
   return (
-    <main>
-      <div className="intro">
-        <h1>Bienvenido a KeyLab</h1>
-        <p>Todo para tu proximo teclado</p>
-      </div>
+  <>
+    {/* Intro */}
+    <section className="intro text-center py-5 mb-5">
+      <h1>Bienvenido a KeyLab</h1>
+      <p>Todo para tu próximo teclado</p>
+    </section>
 
-      <section className="productos-recientes">
-        <h2>Productos recien llegados</h2>
-        <div className="carousel">
-          <button className="carousel-btn prev" onClick={handlePrev}>
-            &#8592;
-          </button>
-          <div className="carousel-items">
-            {carouselImages.map((img, index) => (
-              <Link to="/teclados" key={index}>
-                <img
-                  src={img.src}
-                  alt={img.alt}
-                  className={`carousel-img ${index === currentImage ? 'active' : ''}`}
-                />
-              </Link>
-            ))}
-          </div>
-          <button className="carousel-btn next" onClick={handleNext}>
-            &#8594;
-          </button>
+    {/* Carousel / Productos recientes */}
+    <Container className="text-center py-5">
+      <h2 className="mb-3">Productos recién llegados</h2>
+      <div className="carousel d-flex align-items-center">
+        <Button variant="primary" size="sm" onClick={handlePrev}>&#8592;</Button>
+
+        <div className="carousel-inner mx-3">
+          <Link to="/teclados">
+            <Card>
+              <CardImg src={carouselImages[currentImage].src} alt={carouselImages[currentImage].alt} className="carousel-img.active"/>
+            </Card>
+          </Link>
         </div>
-      </section>
-    </main>
-  );
+
+        <Button variant="primary" size="sm" onClick={handleNext}>&#8594;</Button>
+      </div>
+    </Container>
+  </>
+);
 }
 
 export default Home;
+
