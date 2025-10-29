@@ -1,11 +1,19 @@
+import { Container } from "react-bootstrap";
+import ProductGrid from "../components/ProductGrid";
+import { productos } from "../data/productos";
+
 function Cases() {
+  const cases = productos.filter((p) => p.categoria === "Cases");
+
   return (
-    <main className="container mt-5">
-      <div className="intro_2">
-        <h1>Cases</h1>
-        <p>Cases para tu teclado personalizado</p>
-      </div>
-    </main>
+    <Container className="productos">
+      <h1 className="text-center mb-4">Cases</h1>
+      {cases.length === 0 ? (
+        <p className="text-center">No hay cases disponibles.</p>
+      ) : (
+        <ProductGrid productos={cases} />
+      )}
+    </Container>
   );
 }
 
