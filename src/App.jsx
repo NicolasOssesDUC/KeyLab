@@ -15,8 +15,15 @@ import Carrito from './pages/Carrito';
 import PerfilUsuario from './pages/PerfilUsuario';
 import TestLayout from './pages/TestLayout';
 import TestCard from './pages/TestCard';
+import DetalleProducto from "./pages/DetalleProducto";
+
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+
+
+
+
 
 function App() {
   return (
@@ -37,6 +44,7 @@ function App() {
         <Route path="/perfil/:nombreUsuario" element={<PerfilUsuario />} />
         <Route path="/test-layout" element={<TestLayout />} />
         <Route path="/test-card" element={<TestCard />} />
+        <Route path="/producto/:id" element={<DetalleProducto />} />
       </Routes>
       <Footer />
     </BrowserRouter>

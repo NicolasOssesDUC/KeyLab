@@ -1,11 +1,19 @@
+import { Container } from "react-bootstrap";
+import ProductGrid from "../components/ProductGrid";
+import { productos } from "../data/productos";
+
 function Teclados() {
+  const teclados = productos.filter((p) => p.categoria === "Teclados");
+
   return (
-    <main className="container mt-5">
-      <div className="intro_2">
-        <h1>Teclados</h1>
-        <p>Descubre nuestra colección de teclados mecánicos</p>
-      </div>
-    </main>
+    <Container className="productos">
+      <h1 className="text-center mb-4">Teclados</h1>
+      {teclados.length === 0 ? (
+        <p className="text-center">No hay teclados disponibles.</p>
+      ) : (
+        <ProductGrid productos={teclados} />
+      )}
+    </Container>
   );
 }
 

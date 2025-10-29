@@ -1,0 +1,69 @@
+/* Sección principal de productos */
+.productos {
+  padding: 2rem;
+  margin-top: 60px; /* espacio para navbar */
+}
+
+/* Título de la sección */
+.productos h1 {
+  margin-bottom: 2rem; /* separa título del grid */
+}
+
+/* Contenedor interno (opcional) */
+.contenedor {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Grid de productos */
+.productos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+/* Card individual */
+.ficha {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Wrapper de la imagen */
+.card-img-wrapper {
+  height: 200px; /* altura máxima uniforme */
+  overflow: hidden;
+}
+
+.card-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* mantiene proporción y recorta si es necesario */
+  display: block;
+}
+
+/* Contenido (nombre + precio) */
+.card-content {
+  padding: 1rem;
+  min-height: 60px; /* espacio mínimo para texto */
+}
+
+/* Botones */
+.card-buttons {
+  padding: 0 1rem 1rem 1rem;
+  margin-top: auto; /* empuja botones al fondo de la card */
+}
+
+/* Tipografía y márgenes internos de la card */
+.ficha h4,
+.ficha h5 {
+  margin: 0.5rem 0;
+}
+
+.ficha button {
+  margin-top: 0.5rem;
+}

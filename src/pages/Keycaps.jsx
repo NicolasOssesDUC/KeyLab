@@ -1,11 +1,19 @@
+import { Container } from "react-bootstrap";
+import ProductGrid from "../components/ProductGrid";
+import { productos } from "../data/productos";
+
 function Keycaps() {
+  const keycaps = productos.filter((p) => p.categoria === "Keycaps");
+
   return (
-    <main className="container mt-5">
-      <div className="intro_2">
-        <h1>Key Caps</h1>
-        <p>Personaliza tu teclado con nuestras keycaps</p>
-      </div>
-    </main>
+    <Container className="productos">
+      <h1 className="text-center mb-4">Keycaps</h1>
+      {keycaps.length === 0 ? (
+        <p className="text-center">No hay cases disponibles.</p>
+      ) : (
+        <ProductGrid productos={keycaps} />
+      )}
+    </Container>
   );
 }
 
