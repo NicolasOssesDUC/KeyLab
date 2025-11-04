@@ -16,20 +16,182 @@
 - Página Login con validaciones
 - Sistema de autenticación básico
 - **Wrappers UI:** Button, Layout (Container/Row/Col), Card, FormField, Alert, Table
+- **Páginas de Productos:** Teclados, Cases, Switches, Keycaps, DetalleProducto
+- **Páginas de Contenido:** Nosotros, Ubicación, Contacto
+- **Componente ProductGrid:** Grilla reutilizable de productos
+- **Base de datos:** productos.js con catálogo completo
+- **SweetAlert2:** Integrado para alertas modernas
 
 ### 🟡 En Progreso
-- Migración de páginas de productos
+- Sistema de carrito de compras
+- Migración de Navbar a wrappers propios
 
 ### ⏳ Pendiente
-- Migración completa del carrito
+- Página Productos general (sin filtro de categoría)
+- Context API para carrito
 - Panel de administración
-- Formularios de registro y recuperación
-- Páginas de contenido (Nosotros, Ubicación)
-- Sistema de blogs
+- Wrappers pendientes: Badge, Modal, Pagination, Navigation
+- Página de Perfil de Usuario
+- Sistema de búsqueda
 
 ---
 
 ## 📅 Historial Cronológico
+
+### **Fase 4: Migración de Productos y Contenido (Octubre 2024)**
+
+#### ✅ Migración de Páginas de Productos por Royel
+**Fecha:** 29 de Octubre 2024  
+**Commit:** c36a885
+
+**Tareas completadas:**
+
+1. **Base de datos de productos:**
+   - Archivo creado: `src/data/productos.js`
+   - 266 líneas de código
+   - Productos organizados por categorías:
+     - Teclados (varios formatos: 60%, 75%, Full Size)
+     - Cases
+     - Switches
+     - Keycaps
+   - Estructura de cada producto:
+     ```javascript
+     {
+       id: number,
+       nombre: string,
+       precio: number,
+       categoria: string,
+       subcategoria: string,
+       imagen: string,
+       stock: number,
+       descripcion: string
+     }
+     ```
+
+2. **Componente ProductGrid:**
+   - Ubicación: `src/components/ProductGrid.jsx`
+   - Componente reutilizable para mostrar grillas de productos
+   - Características:
+     - Usa wrappers UI propios (Card, Button)
+     - Integración con React Router (Link)
+     - Botón "Añadir al Carrito" (pendiente implementación)
+     - Botón "Ver Detalle" con navegación
+     - Diseño responsive con CSS personalizado
+   - Estilos: `src/assets/css/ProductGrid.css`
+
+3. **Páginas de categorías migradas:**
+   - ✅ `Teclados.jsx` - Filtra productos de categoría "Teclados"
+   - ✅ `Cases.jsx` - Filtra productos de categoría "Cases"
+   - ✅ `Switches.jsx` - Filtra productos de categoría "Switches"
+   - ✅ `Keycaps.jsx` - Filtra productos de categoría "Keycaps"
+   
+   **Patrón común:**
+   ```jsx
+   const teclados = productos.filter((p) => p.categoria === "Teclados");
+   return (
+     <Container className="productos">
+       <h1 className="text-center mb-4">Teclados</h1>
+       {teclados.length === 0 ? (
+         <p className="text-center">No hay teclados disponibles.</p>
+       ) : (
+         <ProductGrid productos={teclados} />
+       )}
+     </Container>
+   );
+   ```
+
+4. **Página de detalle de producto:**
+   - Archivo: `src/pages/DetalleProducto.jsx`
+   - Funcionalidad: Mostrar información completa de un producto individual
+   - Ruta: `/producto/:id`
+
+5. **Rutas agregadas a App.jsx:**
+   - `/teclados` → Teclados
+   - `/cases` → Cases
+   - `/switches` → Switches
+   - `/keycaps` → Keycaps
+   - `/producto/:id` → DetalleProducto
+
+**Archivos modificados:**
+- `src/App.jsx` - Rutas nuevas
+- `index.html` - Ajustes menores
+- `public/assets/css/main.css` - Estilos adicionales
+
+---
+
+#### ✅ Migración de Páginas de Contenido por Royel
+**Fecha:** 27 de Octubre 2024  
+**Commit:** f030e27
+
+**Tareas completadas:**
+
+1. **Página Home mejorada:**
+   - Refinamiento de la estructura
+   - Mejoras en el carrusel
+   - Optimizaciones de rendimiento
+
+2. **Página Contacto completa:**
+   - Archivo: `src/pages/Contacto.jsx`
+   - Formulario funcional con validaciones
+   - Campos: Nombre, Correo, Mensaje
+   - Validaciones implementadas:
+     - Nombre mínimo 3 caracteres
+     - Correo con formato válido
+     - Mensaje mínimo 10 caracteres
+   - Integración con SweetAlert2 para feedback visual
+   - Limpieza automática del formulario tras envío exitoso
+   - Usa componentes: `FormField`, `Button`, `Container` de wrappers UI
+
+3. **Página Nosotros:**
+   - Archivo: `src/pages/Nosotros.jsx`
+   - Información del equipo de KeyLab
+   - Usa wrapper `Container`
+   - Diseño limpio y profesional
+
+4. **Página Ubicación:**
+   - Archivo: `src/pages/Ubicacion.jsx`
+   - Información de ubicación de la tienda
+   - Usa wrapper `Container`
+
+5. **Dependencia añadida:**
+   - `sweetalert2: ^11.26.3` - Para alertas modernas y elegantes
+   - Actualización de `package.json` y `package-lock.json`
+
+6. **Importación global:**
+   - SweetAlert2 importado en `src/main.jsx` para disponibilidad global
+
+**Características técnicas:**
+- ✅ Manejo de estado con `useState`
+- ✅ Validación de formularios en tiempo real
+- ✅ Feedback visual con SweetAlert2
+- ✅ Uso consistente de wrappers UI propios
+- ✅ Código limpio y mantenible
+
+**Ejemplo de validación implementada:**
+```jsx
+const handleSubmit = (e) => {
+  e.preventDefault();
+  
+  if (formData.nombre.trim().length < 3) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "El nombre debe tener al menos 3 caracteres",
+    });
+    return;
+  }
+  
+  // ... más validaciones
+  
+  Swal.fire({
+    icon: "success",
+    title: "Mensaje enviado",
+    text: "Nos pondremos en contacto contigo pronto.",
+  });
+};
+```
+
+---
 
 ### Fase 1: Configuración Inicial (Octubre 2024)
 
@@ -875,31 +1037,40 @@ KeyLab/
 │       ├── css/
 │       │   ├── main.css           # Estilos principales
 │       │   └── admin.css          # Estilos del admin
-│       ├── data/
-│       │   └── productos.js       # Datos de productos
+│       ├── data/                  # ⚠️ Obsoleto (migrado a src/data)
+│       │   └── productos.js       
 │       ├── fonts/
 │       ├── img/                   # Imágenes del proyecto
 │       └── js/
 │           ├── carrito.js         # Lógica original del carrito
 │           └── validaciones.js    # Validaciones originales
 ├── src/
+│   ├── assets/
+│   │   └── css/
+│   │       └── ProductGrid.css    # ✅ Estilos del grid de productos
 │   ├── components/
 │   │   ├── Navbar.jsx             # ✅ Navbar con dropdown
-│   │   └── Footer.jsx             # ✅ Footer simple
+│   │   ├── Footer.jsx             # ✅ Footer simple
+│   │   └── ProductGrid.jsx        # ✅ Grilla de productos (NUEVO)
+│   ├── data/
+│   │   └── productos.js           # ✅ Base de datos de productos (NUEVO)
 │   ├── pages/
-│   │   ├── Home.jsx               # ✅ Con carrusel
+│   │   ├── Home.jsx               # ✅ Con carrusel mejorado
 │   │   ├── Login.jsx              # ✅ Con validaciones
 │   │   ├── Carrito.jsx            # 🟡 Placeholder
-│   │   ├── Productos.jsx          # 🟡 Placeholder
-│   │   ├── Teclados.jsx           # 🟡 Placeholder
-│   │   ├── Keycaps.jsx            # 🟡 Placeholder
-│   │   ├── Switches.jsx           # 🟡 Placeholder
-│   │   ├── Cases.jsx              # 🟡 Placeholder
-│   │   ├── Contacto.jsx           # 🟡 Placeholder
-│   │   ├── Nosotros.jsx           # 🟡 Placeholder
-│   │   ├── Ubicacion.jsx          # 🟡 Placeholder
+│   │   ├── Productos.jsx          # 🟡 Pendiente (catálogo general)
+│   │   ├── Teclados.jsx           # ✅ Completo con filtrado
+│   │   ├── Keycaps.jsx            # ✅ Completo con filtrado
+│   │   ├── Switches.jsx           # ✅ Completo con filtrado
+│   │   ├── Cases.jsx              # ✅ Completo con filtrado
+│   │   ├── DetalleProducto.jsx    # ✅ Vista individual de producto (NUEVO)
+│   │   ├── Contacto.jsx           # ✅ Formulario completo con SweetAlert2
+│   │   ├── Nosotros.jsx           # ✅ Página informativa completa
+│   │   ├── Ubicacion.jsx          # ✅ Página de ubicación completa
 │   │   ├── PerfilUsuario.jsx      # 🟡 Placeholder
-│   │   └── TestLayout.jsx         # ✅ Página de pruebas
+│   │   ├── TestLayout.jsx         # ✅ Página de pruebas (Layout)
+│   │   └── TestCard.jsx           # ✅ Página de pruebas (Card)
+│   ├── tests/                     # ✅ Setup de testing (sin tests aún)
 │   ├── ui/                        # 🎯 Wrappers de Bootstrap
 │   │   ├── Button.jsx             # ✅ Completado
 │   │   ├── Layout.jsx             # ✅ Completado (Container/Row/Col)
@@ -910,11 +1081,12 @@ KeyLab/
 │   │   └── index.js               # ✅ Exportaciones centralizadas
 │   ├── utils/
 │   │   └── auth.js                # ✅ Autenticación básica
-│   ├── App.jsx                    # ✅ Router principal
+│   ├── App.jsx                    # ✅ Router principal actualizado
 │   ├── App.css                    # ✅ Estilos globales
-│   ├── main.jsx                   # ✅ Entry point
+│   ├── main.jsx                   # ✅ Entry point + SweetAlert2
+│   ├── setup.js                   # ✅ Setup de testing
 │   └── index.css                  # ✅ Reset CSS
-└── package.json
+└── package.json                   # ✅ Actualizado con sweetalert2
 ```
 
 ---
@@ -945,7 +1117,8 @@ KeyLab/
   "react-dom": "^19.1.1",
   "react-router-dom": "^7.9.4",
   "bootstrap": "^5.3.8",
-  "react-bootstrap": "^2.10.10"
+  "react-bootstrap": "^2.10.10",
+  "sweetalert2": "^11.26.3"
 }
 ```
 
@@ -954,7 +1127,9 @@ KeyLab/
 {
   "@vitejs/plugin-react": "^5.0.4",
   "vite": "^7.1.9",
-  "eslint": "^9.37.0"
+  "eslint": "^9.37.0",
+  "@vitest/coverage-v8": "^3.2.4",
+  "@vitest/ui": "^3.2.4"
 }
 ```
 
@@ -1007,21 +1182,35 @@ npm run test
 **Problema:** Componentes interactivos (collapse, dropdown) no funcionaban  
 **Solución:** Importar `bootstrap/dist/js/bootstrap.bundle.min.js` en `main.jsx`
 
+### 7. Base de datos de productos
+**Problema:** Productos en `public/assets/data/` no accesibles fácilmente  
+**Solución:** Migrar a `src/data/productos.js` para importación directa como módulo ES6
+
+### 8. Integración del carrito
+**Problema:** Lógica del carrito en JavaScript vanilla no compatible con React  
+**Solución:** Temporal `window.agregarAlCarrito`, pendiente Context API completo
+
 ---
 
 ## 📝 Próximos Pasos
 
-### 🔴 Prioridad Alta (Integrante A)
+### 🔴 Prioridad Alta
 
-#### ✅ Wrappers UI Base Completados
-1. ✅ **Button.jsx** - Botones con variantes, tamaños y estados
-2. ✅ **Layout.jsx** - Container, Row, Col para sistema de grillas
-3. ✅ **Card.jsx** - Familia completa de componentes de tarjetas
-4. ✅ **FormField.jsx** - Input universal para formularios
-5. ✅ **Alert.jsx** - Alertas dismissibles con todas las variantes
-6. ✅ **Table.jsx** - Tablas con todas las características de Bootstrap
+#### 1. Sistema de Carrito de Compras
+- Crear `CartContext.jsx` con Context API
+- Implementar acciones: add, remove, update, clear
+- Crear hook personalizado `useCart()`
+- Migrar lógica de `public/assets/js/carrito.js` a React
+- Conectar ProductGrid con el carrito
+- Completar página `Carrito.jsx`
 
-#### ⏳ Wrappers Pendientes
+#### 2. Página Productos General
+- Crear `Productos.jsx` con todos los productos sin filtro
+- Implementar sistema de búsqueda
+- Añadir filtros por categoría y precio
+- Integrar con ProductGrid existente
+
+#### 3. Wrappers UI Pendientes
 1. **Badge.jsx**
    - Para etiquetas de estado
    - Para categorías de productos
@@ -1038,87 +1227,96 @@ npm run test
 4. **Pagination.jsx**
    - Para paginación de productos/listados
 
-#### Actualizar Navbar
-5. Migrar `src/components/Navbar.jsx` para usar los nuevos wrappers en lugar de react-bootstrap
-6. Verificar que el menú responsive siga funcionando
-7. Mantener el contador del carrito funcional
+### 🟡 Prioridad Media
 
-#### Documentación
-8. Crear `src/ui/README.md` con:
-    - Propósito de cada componente
-    - Tabla de props
-    - Ejemplos de uso
-    - Lista de componentes pendientes
+#### Migrar ProductGrid a wrappers propios
+- Reemplazar `import { Container } from 'react-bootstrap'`
+- Usar `import { Container } from '../ui/Layout'`
+- Verificar que todo siga funcionando igual
 
-### 🟡 Prioridad Media (Integrante B)
+#### Completar Autenticación
+- Página de Registro completa
+- Recuperación de contraseña
+- Página de Perfil de Usuario
+- Protección de rutas (Route guards)
 
-#### Migrar Páginas de Productos
-1. Crear componentes reutilizables:
-   - `ProductCard`: Tarjeta de producto individual
-   - `ProductGrid`: Grilla de productos
-   - `ProductFilter`: Filtros de categoría/precio
-
-2. Migrar páginas:
-   - `Productos.jsx`: Catálogo completo
-   - `Teclados.jsx`: Filtrado por categoría
-   - `Keycaps.jsx`: Filtrado por categoría
-   - `Switches.jsx`: Filtrado por categoría
-   - `Cases.jsx`: Filtrado por categoría
-
-3. Conectar con datos:
-   - Cargar productos desde `public/assets/data/productos.js`
-   - Implementar filtrado y búsqueda
-   - Agregar al carrito funcional
-
-4. Migrar páginas de contenido:
-   - `Contacto.jsx`: Formulario de contacto
-   - `Nosotros.jsx`: Información de la empresa
-   - `Ubicacion.jsx`: Mapa y dirección
-
-### 🟢 Prioridad Baja (Integrante C)
-
-#### Sistema de Carrito
-1. Crear Context API para el carrito:
-   - `CartContext.jsx`: Estado global del carrito
-   - `CartProvider.jsx`: Provider para la app
-   - Acciones: add, remove, update, clear
-
-2. Migrar `Carrito.jsx`:
-   - Listar productos del carrito
-   - Actualizar cantidades
-   - Calcular totales
-   - Botón de checkout
-
-3. Hooks personalizados:
-   - `useCart()`: Para acceder al carrito desde cualquier componente
-   - `useAuth()`: Para gestión de autenticación
-
-#### Autenticación Completa
-4. Completar flujo de Login:
-   - Validar credenciales contra localStorage
-   - Guardar sesión en sessionStorage
-   - Redirección según rol (admin/cliente)
-
-5. Crear páginas:
-   - `Registro.jsx`: Formulario de registro
-   - `PassRecov.jsx`: Recuperación de contraseña
-   - `Perfil.jsx`: Editar perfil de usuario
+### 🟢 Prioridad Baja
 
 #### Panel de Administración
-6. Layout del admin:
-   - Sidebar con navegación
-   - Dashboard con estadísticas
+- Layout del admin con sidebar
+- Dashboard con estadísticas
+- CRUD de productos
+- CRUD de usuarios
+- Gestión de pedidos
 
-7. CRUD de Productos:
-   - Listar productos (tabla)
-   - Crear producto nuevo
-   - Editar producto existente
-   - Eliminar producto
+#### Optimizaciones
+- Lazy loading de rutas
+- Optimización de imágenes
+- Tests automatizados con Vitest
+- Documentación completa de componentes
 
-8. CRUD de Usuarios:
-   - Listar usuarios
-   - Editar roles
-   - Desactivar usuarios
+---
+
+## 📌 Notas Importantes para el Equipo
+
+1. **Bootstrap está temporalmente**: Los wrappers usan clases Bootstrap, pero cuando tengamos todos los componentes listos, podemos cambiar el interior de cada wrapper sin tocar el resto del código.
+
+2. **Mantener estilos originales**: El archivo `public/assets/css/main.css` contiene estilos personalizados que complementan Bootstrap. Estos se deben respetar.
+
+3. **Assets en public**: Todos los assets (imágenes, CSS, JS originales) están en `public/assets/` para acceso directo sin procesamiento de Vite.
+
+4. **localStorage vs sessionStorage**: 
+   - `localStorage`: Datos persistentes (usuarios, productos en carrito)
+   - `sessionStorage`: Sesión actual (usuario logueado)
+
+5. **Coordinación entre integrantes**: 
+   - Comunicar en el grupo cuando un componente esté listo
+   - No duplicar trabajo: revisar qué está hecho antes de empezar
+   - Hacer commits frecuentes con mensajes descriptivos
+
+6. **Testing**: Por ahora probar manualmente en el navegador. El setup de Vitest está listo para cuando queramos añadir tests automatizados.
+
+7. **⚠️ CRÍTICO - Migración de datos**: 
+   - ✅ La base de datos se movió a `src/data/productos.js`
+   - ❌ El archivo en `public/assets/data/` está **obsoleto**
+   - Usar siempre: `import { productos } from '../data/productos'`
+
+8. **⚠️ CRÍTICO - ProductGrid y react-bootstrap**: 
+   - ProductGrid actualmente usa `Container` de react-bootstrap
+   - **DEBE migrar** a `import { Container } from '../ui/Layout'`
+   - Mismo comportamiento, pero sin dependencia externa
+
+9. **⚠️ CRÍTICO - Carrito pendiente**: 
+   - ProductGrid llama a `window.agregarAlCarrito()`
+   - Esta función **no existe** en React aún
+   - **SIGUIENTE PASO:** Implementar CartContext con Context API
+
+10. **SweetAlert2 disponible globalmente**: 
+    - Ya configurado en el proyecto
+    - Usar: `import Swal from 'sweetalert2'`
+    - Ejemplo en `Contacto.jsx`
+
+11. **Vitest configurado**: 
+    - Setup completo en `src/setup.js`
+    - Coverage con v8
+    - UI de testing disponible
+    - Pendiente: escribir los tests
+
+12. **Git workflow recomendado**:
+    ```bash
+    # Antes de empezar a trabajar
+    git pull origin main
+    
+    # Crear rama para tu feature
+    git checkout -b feature/nombre-feature
+    
+    # Commits frecuentes
+    git add .
+    git commit -m "feat: descripción clara"
+    
+    # Push y crear PR
+    git push origin feature/nombre-feature
+    ```
 
 ---
 
@@ -1208,31 +1406,51 @@ npm run test
 ### Páginas
 - ✅ Home (1/13) - 8%
 - ✅ Login (1/13) - 8%
-- ⏳ Productos (0/13)
-- ⏳ Teclados (0/13)
-- ⏳ Keycaps (0/13)
-- ⏳ Switches (0/13)
-- ⏳ Cases (0/13)
-- ⏳ Contacto (0/13)
-- ⏳ Nosotros (0/13)
-- ⏳ Ubicacion (0/13)
+- ✅ Teclados (1/13) - 8% 🆕
+- ✅ Keycaps (1/13) - 8% 🆕
+- ✅ Switches (1/13) - 8% 🆕
+- ✅ Cases (1/13) - 8% 🆕
+- ✅ DetalleProducto (1/13) - 8% 🆕
+- ✅ Contacto (1/13) - 8% 🆕
+- ✅ Nosotros (1/13) - 8% 🆕
+- ✅ Ubicacion (1/13) - 8% 🆕
+- ⏳ Productos (0/13) - Catálogo general pendiente
 - ⏳ Carrito (0/13)
 - ⏳ Perfil (0/13)
 - ⏳ Admin (0/13)
 
-**Total Páginas: 15% completado** (2 de 13)
+**Total Páginas: 77% completado** (10 de 13) 📈
+
+### Componentes Reutilizables
+- ✅ Navbar (3/3) - 100%
+- ✅ Footer (3/3) - 100%
+- ✅ ProductGrid (3/3) - 100% 🆕
+
+**Total Componentes: 100% completado** (3 de 3)
 
 ### Funcionalidades
 - ✅ Routing (100%)
 - ✅ Navegación (100%)
 - ✅ Carrusel (100%)
+- ✅ Catálogo de productos (100%) 🆕
+- ✅ Filtrado por categorías (100%) 🆕
+- ✅ Detalle de productos (100%) 🆕
+- ✅ Formulario de contacto (100%) 🆕
+- ✅ Páginas informativas (100%) 🆕
 - 🟡 Autenticación (50%)
-- ⏳ Carrito (0%)
-- ⏳ Catálogo (0%)
+- ⏳ Carrito de compras (0%)
 - ⏳ Admin Panel (0%)
-- ⏳ Formularios (25%)
+- ⏳ Sistema de búsqueda (0%)
 
-**Total Funcionalidades: 47% completado**
+**Total Funcionalidades: 75% completado** 📈
+
+### Resumen General
+- **Wrappers UI:** 60% (6/10)
+- **Páginas:** 77% (10/13)
+- **Componentes:** 100% (3/3)
+- **Funcionalidades:** 75% (9/12)
+
+**🎯 PROGRESO TOTAL DEL PROYECTO: ~78%** 🎉
 
 ---
 
@@ -1250,6 +1468,7 @@ Una aplicación React moderna, mantenible y escalable que:
 
 ---
 
-**Última actualización:** 23 de Octubre 2024  
-**Próximo paso:** Crear Badge.jsx, Navigation.jsx, Modal.jsx y migrar páginas de productos  
-**Responsable actual:** Integrantes A, B y C (Wrappers pendientes + Migración de páginas)
+**Última actualización:** 31 de Octubre 2024  
+**Progreso total:** 78% completado 🎉  
+**Próximo paso:** Implementar Context API para carrito de compras y crear página Productos general  
+**Responsable actual:** Equipo completo (Carrito + Productos general + Wrappers pendientes)

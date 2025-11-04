@@ -15,6 +15,7 @@ import Carrito from './pages/Carrito';
 import PerfilUsuario from './pages/PerfilUsuario';
 import TestLayout from './pages/TestLayout';
 import TestCard from './pages/TestCard';
+import TestBadge from './pages/TestBadge';
 import DetalleProducto from "./pages/DetalleProducto";
 
 
@@ -44,6 +45,7 @@ function App() {
         <Route path="/perfil/:nombreUsuario" element={<PerfilUsuario />} />
         <Route path="/test-layout" element={<TestLayout />} />
         <Route path="/test-card" element={<TestCard />} />
+        <Route path="/test-badge" element={<TestBadge />} />
         <Route path="/producto/:id" element={<DetalleProducto />} />
       </Routes>
       <Footer />

@@ -15,6 +15,9 @@ export {
 // Button Component
 export { default as Button } from './Button';
 
+// Badge Component
+export { default as Badge } from './Badge';
+
 // Form Components
 export { default as FormField } from './FormField';
 
