@@ -11,6 +11,7 @@ import Contacto from './pages/Contacto';
 import Nosotros from './pages/Nosotros';
 import Ubicacion from './pages/Ubicacion';
 import Login from './pages/Login';
+import Registro from "./pages/Registro";
 import Carrito from './pages/Carrito';
 import PerfilUsuario from './pages/PerfilUsuario';
 import TestLayout from './pages/TestLayout';
@@ -41,6 +42,7 @@ function App() {
         <Route path="/nosotros" element={<Nosotros />} />
         <Route path="/ubicacion" element={<Ubicacion />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/registro" element={<Registro />} />
         <Route path="/carrito" element={<Carrito />} />
         <Route path="/perfil/:nombreUsuario" element={<PerfilUsuario />} />
         <Route path="/test-layout" element={<TestLayout />} />
