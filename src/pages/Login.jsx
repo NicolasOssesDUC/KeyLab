@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ALLOWED_EMAIL_DOMAINS, seedAdminUser } from '../utils/auth';
+import { useAuth } from '../context/AuthContext'; // ⚡ Importamos el contexto
 
 function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({ email: '', password: '' });
+  const navigate = useNavigate();
+  const { login } = useAuth(); // ⚡ Obtenemos la función de login desde el contexto
 
   useEffect(() => {
     document.body.classList.add('login-body');
-    seedAdminUser();
+    seedAdminUser(); // Crea el admin si no existe
     return () => {
       document.body.classList.remove('login-body');
     };
@@ -52,6 +55,7 @@ function Login() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
     const currentErrors = {
       email: validateField('email', form.email),
       password: validateField('password', form.password),
@@ -59,17 +63,27 @@ function Login() {
     setErrors(currentErrors);
 
     const hasErrors = Object.values(currentErrors).some(Boolean);
-    if (hasErrors) {
+    if (hasErrors) return;
+
+    // Intentamos logear con los datos desde el contexto (usa localStorage internamente)
+    const success = login(form.email.trim(), form.password.trim());
+
+    if (!success) {
+      alert('Correo o contraseña incorrectos.');
       return;
     }
 
-    // TODO: Implementar lógica de autenticación y redirección.
-    // De momento dejamos un log para confirmar acción.
-    console.log('Formulario válido, pendiente de integración con autenticación.');
+    // ✅ Redirección según el rol, sin recargar
+    const user = JSON.parse(localStorage.getItem('usuarioActivo'));
+    if (user?.rol === 'Administrador') {
+      navigate('/admin');
+    } else {
+      navigate('/home');
+    }
   };
 
   return (
-    <main>
+    <main className="pt-5">
       <div className="split-container">
         <div className="split-left">
           <Link to="/">

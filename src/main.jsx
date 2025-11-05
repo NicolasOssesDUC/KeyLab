@@ -1,12 +1,18 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './index.css'
-import App from './App.jsx'
+import './index.css';
+import App from './App.jsx';
+import { seedAdminUser } from './utils/auth.js'; 
+import { AuthProvider } from './context/AuthContext.jsx';
+
+seedAdminUser();
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </StrictMode>,
-)
+);
