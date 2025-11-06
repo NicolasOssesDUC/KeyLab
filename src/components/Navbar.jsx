@@ -1,29 +1,11 @@
 import { Link } from 'react-router-dom';
 import { Navbar as BsNavbar, Nav, NavDropdown, Container } from 'react-bootstrap';
-import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 function Navbar() {
-  const [cartCount, setCartCount] = useState(0);
-  const { user, logout } = useAuth(); // 👈 obtenemos el usuario y la función logout
-
-  useEffect(() => {
-    const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-    setCartCount(carrito.length);
-
-    const updateCartCount = () => {
-      const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-      setCartCount(carrito.length);
-    };
-
-    window.addEventListener('storage', updateCartCount);
-    window.addEventListener('cartUpdated', updateCartCount);
-
-    return () => {
-      window.removeEventListener('storage', updateCartCount);
-      window.removeEventListener('cartUpdated', updateCartCount);
-    };
-  }, []);
+  const { user, logout } = useAuth();
+  const { getTotalItems } = useCart();
 
   return (
     <BsNavbar expand="lg" className="navbar-light bg-light" fixed="top">
@@ -82,11 +64,11 @@ function Navbar() {
 
             <Nav.Link as={Link} to="/carrito" className="nav-link position-relative me-3">
               <img src="/assets/img/carrito.jpg" alt="carrito" style={{ width: '24px' }} />
-              <span 
+              <span
                 id="contador" 
                 className="position-absolute top-50 start-100 translate-middle-y"
               >
-                {cartCount}
+                {getTotalItems()}
               </span>
             </Nav.Link>
           </Nav>
