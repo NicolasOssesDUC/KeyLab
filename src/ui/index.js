@@ -33,3 +33,6 @@ export {
   TableRow,
   TableCell
 } from './Table';
+
+// Pagination Component
+export { default as Pagination } from './Pagination';
