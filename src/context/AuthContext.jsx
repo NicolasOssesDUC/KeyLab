@@ -1,52 +1,61 @@
-// src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
+const SESSION_KEY = 'authUser';
 
 export function AuthProvider({ children }) {
+  // Leer sesión desde sessionStorage
   const [user, setUser] = useState(() => {
-    const raw = localStorage.getItem('user');
-    return raw ? JSON.parse(raw) : null;
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
   });
 
-  // Mantener localStorage en sincronía con el estado
+  // Mantener sessionStorage sincronizado con el estado
   useEffect(() => {
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('user');
-    }
+    try {
+      if (user) {
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+      } else {
+        sessionStorage.removeItem(SESSION_KEY);
+      }
+    } catch {}
   }, [user]);
 
-  // login por email + password -> devuelve true si encontró usuario
-  const login = (email, password) => {
-    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-    const found = usuarios.find(
-      (u) =>
-        String(u.email).trim() === String(email).trim() &&
-        String(u.password) === String(password)
-    );
-    if (!found) return false;
-    setUser(found);
-    return true;
-  };
+// login por email + password → devuelve el usuario o null
+const login = (email, password) => {
+  const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+  const found = usuarios.find(
+    (u) =>
+      String(u.email).trim() === String(email).trim() &&
+      String(u.password) === String(password)
+  );
+  if (!found) return null;
+  setUser(found);             // esto ya guarda en sessionStorage por el useEffect
+  return found;               // ⬅️ devolvemos el usuario
+};
 
-  // register: recibe un objeto usuario { run, nombre, apellidos, email, password, rol }
-  // devuelve true si registró, false si el email ya existe
+  // Registro de nuevo usuario
   const register = (usuario) => {
-    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-    const exists = usuarios.some(
-      (u) => String(u.email).trim() === String(usuario.email).trim()
-    );
-    if (exists) return false;
-    usuarios.push(usuario);
-    localStorage.setItem('usuarios', JSON.stringify(usuarios));
-    setUser(usuario); // iniciar sesión automático tras registrar
-    return true;
-  };
+  const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+  const exists = usuarios.some(
+    (u) => String(u.email).trim() === String(usuario.email).trim()
+  );
+  if (exists) return null;
+  usuarios.push(usuario);
+  localStorage.setItem('usuarios', JSON.stringify(usuarios));
+  setUser(usuario);
+  return usuario; // ⬅️ devolvemos el usuario
+};
 
+  // Cerrar sesión
   const logout = () => {
     setUser(null);
+    // opcional: limpiar y recargar para que el navbar cambie de inmediato
+    window.location.reload();
   };
 
   return (
@@ -56,7 +65,6 @@ export function AuthProvider({ children }) {
   );
 }
 
-/* eslint-disable react-refresh/only-export-components */
 export function useAuth() {
   return useContext(AuthContext);
 }

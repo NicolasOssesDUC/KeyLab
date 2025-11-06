@@ -66,21 +66,21 @@ function Login() {
     if (hasErrors) return;
 
     // Intentamos logear con los datos desde el contexto (usa localStorage internamente)
-    const success = login(form.email.trim(), form.password.trim());
+    // Intentamos logear con los datos desde el contexto
+    const u = login(form.email.trim(), form.password.trim());
 
-    if (!success) {
-      alert('Correo o contraseña incorrectos.');
-      return;
+    if (!u) {
+    alert('Correo o contraseña incorrectos.');
+    return;
     }
 
-    // ✅ Redirección según el rol, sin recargar
-    const user = JSON.parse(localStorage.getItem('usuarioActivo'));
-    if (user?.rol === 'Administrador') {
-      navigate('/admin');
+    // ✅ Redirección según el rol (rutas válidas)
+    if (u.rol === 'Administrador') {
+    navigate('/admin');
     } else {
-      navigate('/home');
+    navigate('/');             // tu Home está en "/"
     }
-  };
+      };
 
   return (
     <main className="pt-5">
