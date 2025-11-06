@@ -18,7 +18,8 @@ import TestLayout from './pages/TestLayout';
 import TestCard from './pages/TestCard';
 import TestBadge from './pages/TestBadge';
 import DetalleProducto from "./pages/DetalleProducto";
-
+import Admin from './pages/Admin';
+import { Navigate } from 'react-router-dom';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -32,6 +33,8 @@ function App() {
     <BrowserRouter>
       <Navbar />
       <Routes>
+        <Route path="/home" element={<Navigate to="/" replace />} />
+        <Route path="/admin/*" element={<Admin />} />
         <Route path="/" element={<Home />} />
         <Route path="/productos" element={<Productos />} />
         <Route path="/teclados" element={<Teclados />} />
