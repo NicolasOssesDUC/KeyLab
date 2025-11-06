@@ -1,25 +1,37 @@
-// src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 
+// Contexto principal
 const AuthContext = createContext(null);
 export { AuthContext };
 
+const SESSION_KEY = 'authUser';
+
 export function AuthProvider({ children }) {
+  // Leer sesión desde sessionStorage
   const [user, setUser] = useState(() => {
-    const raw = localStorage.getItem('user');
-    return raw ? JSON.parse(raw) : null;
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (error) {
+      console.error('Error leyendo sesión:', error);
+      return null;
+    }
   });
 
-  // Mantener localStorage en sincronía con el estado
+  // Mantener sessionStorage sincronizado con el estado
   useEffect(() => {
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('user');
+    try {
+      if (user) {
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+      } else {
+        sessionStorage.removeItem(SESSION_KEY);
+      }
+    } catch (error) {
+      console.error('Error guardando sesión:', error);
     }
   }, [user]);
 
-  // login por email + password -> devuelve true si encontró usuario
+  // Login por email + password → devuelve el usuario o null
   const login = (email, password) => {
     const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
     const found = usuarios.find(
@@ -27,27 +39,28 @@ export function AuthProvider({ children }) {
         String(u.email).trim() === String(email).trim() &&
         String(u.password) === String(password)
     );
-    if (!found) return false;
-    setUser(found);
-    return true;
+    if (!found) return null;
+    setUser(found); // ya guarda en sessionStorage por el useEffect
+    return found;   // devolvemos el usuario
   };
 
-  // register: recibe un objeto usuario { run, nombre, apellidos, email, password, rol }
-  // devuelve true si registró, false si el email ya existe
+  // Registro de nuevo usuario
   const register = (usuario) => {
     const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
     const exists = usuarios.some(
       (u) => String(u.email).trim() === String(usuario.email).trim()
     );
-    if (exists) return false;
+    if (exists) return null;
     usuarios.push(usuario);
     localStorage.setItem('usuarios', JSON.stringify(usuarios));
-    setUser(usuario); // iniciar sesión automático tras registrar
-    return true;
+    setUser(usuario);
+    return usuario; // devolvemos el usuario
   };
 
+  // Cerrar sesión
   const logout = () => {
     setUser(null);
+    window.location.reload(); // opcional para refrescar la UI
   };
 
   return (
@@ -57,7 +70,7 @@ export function AuthProvider({ children }) {
   );
 }
 
-/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable-next-line */
 export function useAuth() {
   return useContext(AuthContext);
 }

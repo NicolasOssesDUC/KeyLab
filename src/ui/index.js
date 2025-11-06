@@ -15,6 +15,9 @@ export {
 // Button Component
 export { default as Button } from './Button';
 
+// Badge Component
+export { default as Badge } from './Badge';
+
 // Form Components
 export { default as FormField } from './FormField';
 
@@ -30,3 +33,9 @@ export {
   TableRow,
   TableCell
 } from './Table';
+
+// Pagination Component
+export { default as Pagination } from './Pagination';
+
+// Modal Components
+export { Modal, ModalHeader, ModalTitle, ModalBody, ModalFooter } from './Modal';

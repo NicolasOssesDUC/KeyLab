@@ -16,8 +16,12 @@ import Carrito from './pages/Carrito';
 import PerfilUsuario from './pages/PerfilUsuario';
 import TestLayout from './pages/TestLayout';
 import TestCard from './pages/TestCard';
+import TestBadge from './pages/TestBadge';
+import TestPagination from './pages/TestPagination';
+import TestModal from './pages/TestModal';
 import DetalleProducto from "./pages/DetalleProducto";
-
+import Admin from './pages/Admin';
+import { Navigate } from 'react-router-dom';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -31,6 +35,8 @@ function App() {
     <BrowserRouter>
       <Navbar />
       <Routes>
+        <Route path="/home" element={<Navigate to="/" replace />} />
+        <Route path="/admin/*" element={<Admin />} />
         <Route path="/" element={<Home />} />
         <Route path="/productos" element={<Productos />} />
         <Route path="/teclados" element={<Teclados />} />
@@ -46,6 +52,9 @@ function App() {
         <Route path="/perfil/:nombreUsuario" element={<PerfilUsuario />} />
         <Route path="/test-layout" element={<TestLayout />} />
         <Route path="/test-card" element={<TestCard />} />
+        <Route path="/test-badge" element={<TestBadge />} />
+        <Route path="/test-pagination" element={<TestPagination />} />
+        <Route path="/test-modal" element={<TestModal />} />
         <Route path="/producto/:id" element={<DetalleProducto />} />
       </Routes>
       <Footer />
