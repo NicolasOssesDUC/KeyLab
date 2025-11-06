@@ -36,3 +36,6 @@ export {
 
 // Pagination Component
 export { default as Pagination } from './Pagination';
+
+// Modal Components
+export { Modal, ModalHeader, ModalTitle, ModalBody, ModalFooter } from './Modal';

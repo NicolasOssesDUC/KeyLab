@@ -18,6 +18,7 @@ import TestLayout from './pages/TestLayout';
 import TestCard from './pages/TestCard';
 import TestBadge from './pages/TestBadge';
 import TestPagination from './pages/TestPagination';
+import TestModal from './pages/TestModal';
 import DetalleProducto from "./pages/DetalleProducto";
 import Admin from './pages/Admin';
 import { Navigate } from 'react-router-dom';
@@ -53,6 +54,7 @@ function App() {
         <Route path="/test-card" element={<TestCard />} />
         <Route path="/test-badge" element={<TestBadge />} />
         <Route path="/test-pagination" element={<TestPagination />} />
+        <Route path="/test-modal" element={<TestModal />} />
         <Route path="/producto/:id" element={<DetalleProducto />} />
       </Routes>
       <Footer />
