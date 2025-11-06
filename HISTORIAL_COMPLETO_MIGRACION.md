@@ -15,7 +15,7 @@
 - Página Home con carrusel funcional
 - Página Login y Registro con validaciones
 - Sistema de autenticación con Context API
-- **Wrappers UI:** Button, Layout (Container/Row/Col), Card, FormField, Alert, Table, Badge, Pagination
+- **Wrappers UI:** Button, Layout (Container/Row/Col), Card, FormField, Alert, Table, Badge, Pagination, Modal
 - **Páginas de Productos:** Teclados, Cases, Switches, Keycaps, DetalleProducto
 - **Páginas de Contenido:** Nosotros, Ubicación, Contacto
 - **Componente ProductGrid:** Grilla reutilizable de productos
@@ -30,7 +30,7 @@
 - Página Productos general (sin filtro de categoría)
 - Context API para carrito
 - Panel de administración
-- Wrappers pendientes: Modal, Navigation
+- Wrappers pendientes: Navigation
 - Página de Perfil de Usuario
 - Sistema de búsqueda
 
@@ -39,6 +39,79 @@
 ## 📅 Historial Cronológico
 
 ### **Fase 5: Finalización de Wrappers UI (Noviembre 2024)**
+
+#### ✅ Wrapper Modal - Diálogos y ventanas emergentes
+**Fecha:** 6 de Noviembre 2024  
+**Responsable:** Equipo (con metodología educativa)
+
+**Componentes creados:**
+- Archivo: `src/ui/Modal.jsx`
+- Líneas de código: 179
+- 5 componentes en familia:
+  - `Modal` (principal)
+  - `ModalHeader`
+  - `ModalTitle`
+  - `ModalBody`
+  - `ModalFooter`
+
+**Props implementadas (Modal):**
+- `show` (obligatorio): boolean - Modal visible/oculto
+- `onHide` (obligatorio): función - Callback al cerrar
+- `size`: 'sm', 'md', 'lg', 'xl'
+- `centered`: Centrado verticalmente
+- `backdrop`: true/false/'static'
+- `keyboard`: Cerrar con ESC
+- `animation`: Con/sin animación
+- `scrollable`: Scroll interno
+- `fullscreen`: Pantalla completa (boolean o breakpoint)
+- `className`: Clases adicionales
+
+**Características técnicas:**
+1. **React Portals:**
+   - Renderiza en `document.body` con `createPortal`
+   - Evita problemas de z-index y overflow
+
+2. **Context API:**
+   - `ModalContext` para compartir `onHide` entre componentes
+   - `useContext` en ModalHeader para acceder al contexto
+
+3. **useEffect para eventos globales:**
+   - Bloqueo de scroll del body cuando modal está abierto
+   - Event listener para tecla ESC
+   - Cleanup al desmontar
+
+4. **Manejo de eventos:**
+   - Click en backdrop (opcional)
+   - Click en botón X
+   - Presionar ESC (opcional)
+   - backdrop="static" previene cierre accidental
+
+**Página de pruebas:**
+- Archivo: `src/pages/TestModal.jsx`
+- Ruta: `/test-modal`
+- 9 ejemplos diferentes:
+  1. Modal básico con header, body, footer
+  2. Diferentes tamaños (sm, md, lg, xl)
+  3. Centrado verticalmente
+  4. Backdrop static (no cierra al hacer click fuera)
+  5. Sin teclado (ESC deshabilitado)
+  6. Con scroll interno (contenido largo)
+  7. Fullscreen
+  8. Formulario completo con validación
+  9. Confirmación de eliminación
+
+**Integración:**
+- ✅ Exportado en `src/ui/index.js`
+- ✅ Ruta agregada en `App.jsx`
+- ✅ Probado y funcional en navegador
+
+**Documentación educativa:**
+- `~/aprendizaje-react/10-QUE-ES-MODAL.md`
+- `~/aprendizaje-react/11-DISENO-API-MODAL.md`
+
+**Estado:** ✅ **COMPLETADO Y PROBADO**
+
+---
 
 #### ✅ Wrapper Pagination - Paginación de contenido
 **Fecha:** 6 de Noviembre 2024  
@@ -1139,7 +1212,8 @@ KeyLab/
 │   │   ├── TestLayout.jsx         # ✅ Página de pruebas (Layout)
 │   │   ├── TestCard.jsx           # ✅ Página de pruebas (Card)
 │   │   ├── TestBadge.jsx          # ✅ Página de pruebas (Badge)
-│   │   └── TestPagination.jsx     # ✅ Página de pruebas (Pagination) 🆕
+│   │   ├── TestPagination.jsx     # ✅ Página de pruebas (Pagination)
+│   │   └── TestModal.jsx          # ✅ Página de pruebas (Modal) 🆕
 │   ├── tests/                     # ✅ Setup de testing (sin tests aún)
 │   ├── ui/                        # 🎯 Wrappers de Bootstrap
 │   │   ├── Button.jsx             # ✅ Completado
@@ -1149,7 +1223,8 @@ KeyLab/
 │   │   ├── Alert.jsx              # ✅ Completado (alertas con todas las variantes)
 │   │   ├── Table.jsx              # ✅ Completado (Table, TableHead, TableBody, etc.)
 │   │   ├── Badge.jsx              # ✅ Completado (etiquetas y contadores)
-│   │   ├── Pagination.jsx         # ✅ Completado (paginación) 🆕
+│   │   ├── Pagination.jsx         # ✅ Completado (paginación)
+│   │   ├── Modal.jsx              # ✅ Completado (Modal, ModalHeader, etc.) 🆕
 │   │   └── index.js               # ✅ Exportaciones centralizadas
 │   ├── utils/
 │   │   └── auth.js                # ✅ Autenticación básica
@@ -1462,18 +1537,18 @@ npm run test
 ## 🎯 Métricas de Progreso
 
 ### Componentes UI Wrappers
-- ✅ Button (8/10) - 10%
-- ✅ Layout (Container, Row, Col) (8/10) - 10%
-- ✅ Card (8/10) - 10%
-- ✅ FormField (8/10) - 10%
-- ✅ Alert (8/10) - 10%
-- ✅ Table (8/10) - 10%
-- ✅ Badge (8/10) - 10%
-- ✅ Pagination (8/10) - 10% 🆕
+- ✅ Button (9/10) - 10%
+- ✅ Layout (Container, Row, Col) (9/10) - 10%
+- ✅ Card (9/10) - 10%
+- ✅ FormField (9/10) - 10%
+- ✅ Alert (9/10) - 10%
+- ✅ Table (9/10) - 10%
+- ✅ Badge (9/10) - 10%
+- ✅ Pagination (9/10) - 10%
+- ✅ Modal (9/10) - 10% 🆕
 - ⏳ Navigation (0/10)
-- ⏳ Modal (0/10)
 
-**Total Wrappers: 80% completado** (8 de 10) 📈
+**Total Wrappers: 90% completado** (9 de 10) 📈
 
 ### Páginas
 - ✅ Home (1/13) - 8%
@@ -1517,12 +1592,12 @@ npm run test
 **Total Funcionalidades: 75% completado** 📈
 
 ### Resumen General
-- **Wrappers UI:** 80% (8/10) 📈
+- **Wrappers UI:** 90% (9/10) 📈
 - **Páginas:** 77% (10/13)
 - **Componentes:** 100% (3/3)
 - **Funcionalidades:** 75% (9/12)
 
-**🎯 PROGRESO TOTAL DEL PROYECTO: ~83%** 🎉
+**🎯 PROGRESO TOTAL DEL PROYECTO: ~86%** 🎉
 
 ---
 
@@ -1541,6 +1616,6 @@ Una aplicación React moderna, mantenible y escalable que:
 ---
 
 **Última actualización:** 6 de Noviembre 2024  
-**Progreso total:** 83% completado 🎉  
-**Próximo paso:** Completar wrappers Modal y Navigation  
-**Responsable actual:** Equipo completo (Modal + Navigation + Carrito Context)
+**Progreso total:** 86% completado 🎉  
+**Próximo paso:** Completar último wrapper Navigation  
+**Responsable actual:** Equipo completo (Navigation + Carrito Context)

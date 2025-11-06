@@ -56,6 +56,16 @@ export function AuthProvider({ children }) {
     setUser(usuario);
     return usuario; // devolvemos el usuario
   };
+  const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+  const exists = usuarios.some(
+    (u) => String(u.email).trim() === String(usuario.email).trim()
+  );
+  if (exists) return null;
+  usuarios.push(usuario);
+  localStorage.setItem('usuarios', JSON.stringify(usuarios));
+  setUser(usuario);
+  return usuario; // devolvemos el usuario
+};
 
   // Cerrar sesión
   const logout = () => {
