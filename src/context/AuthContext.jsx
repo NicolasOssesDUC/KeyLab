@@ -48,7 +48,7 @@ const login = (email, password) => {
   usuarios.push(usuario);
   localStorage.setItem('usuarios', JSON.stringify(usuarios));
   setUser(usuario);
-  return usuario; // ⬅️ devolvemos el usuario
+  return usuario; // devolvemos el usuario
 };
 
   // Cerrar sesión
