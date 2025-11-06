@@ -1,6 +1,9 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
+// Contexto principal
 const AuthContext = createContext(null);
+export { AuthContext };
+
 const SESSION_KEY = 'authUser';
 
 export function AuthProvider({ children }) {
@@ -9,7 +12,8 @@ export function AuthProvider({ children }) {
     try {
       const raw = sessionStorage.getItem(SESSION_KEY);
       return raw ? JSON.parse(raw) : null;
-    } catch {
+    } catch (error) {
+      console.error('Error leyendo sesión:', error);
       return null;
     }
   });
@@ -22,24 +26,36 @@ export function AuthProvider({ children }) {
       } else {
         sessionStorage.removeItem(SESSION_KEY);
       }
-    } catch {}
+    } catch (error) {
+      console.error('Error guardando sesión:', error);
+    }
   }, [user]);
 
-// login por email + password → devuelve el usuario o null
-const login = (email, password) => {
-  const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-  const found = usuarios.find(
-    (u) =>
-      String(u.email).trim() === String(email).trim() &&
-      String(u.password) === String(password)
-  );
-  if (!found) return null;
-  setUser(found);             // esto ya guarda en sessionStorage por el useEffect
-  return found;               // ⬅️ devolvemos el usuario
-};
+  // Login por email + password → devuelve el usuario o null
+  const login = (email, password) => {
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+    const found = usuarios.find(
+      (u) =>
+        String(u.email).trim() === String(email).trim() &&
+        String(u.password) === String(password)
+    );
+    if (!found) return null;
+    setUser(found); // ya guarda en sessionStorage por el useEffect
+    return found;   // devolvemos el usuario
+  };
 
   // Registro de nuevo usuario
   const register = (usuario) => {
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+    const exists = usuarios.some(
+      (u) => String(u.email).trim() === String(usuario.email).trim()
+    );
+    if (exists) return null;
+    usuarios.push(usuario);
+    localStorage.setItem('usuarios', JSON.stringify(usuarios));
+    setUser(usuario);
+    return usuario; // devolvemos el usuario
+  };
   const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
   const exists = usuarios.some(
     (u) => String(u.email).trim() === String(usuario.email).trim()
@@ -54,8 +70,7 @@ const login = (email, password) => {
   // Cerrar sesión
   const logout = () => {
     setUser(null);
-    // opcional: limpiar y recargar para que el navbar cambie de inmediato
-    window.location.reload();
+    window.location.reload(); // opcional para refrescar la UI
   };
 
   return (
@@ -65,6 +80,7 @@ const login = (email, password) => {
   );
 }
 
+/* eslint-disable-next-line */
 export function useAuth() {
   return useContext(AuthContext);
 }
