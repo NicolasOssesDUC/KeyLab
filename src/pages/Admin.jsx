@@ -3,6 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import Alert from '../ui/Alert';
 import { Card, CardBody, CardTitle, CardText } from '../ui/Card';
 import * as TableNS from '../ui/Table';
+import AdminProductos from './AdminProductos';
+import AdminUsuarios from './AdminUsuarios';
+
 const TableComp = TableNS.default ?? TableNS.Table;
 
 // helpers seguros para leer localStorage
@@ -106,6 +109,8 @@ export default function Admin() {
           )}
         </tbody>
       </TableComp>
+        <AdminProductos />
+        <AdminUsuarios />
     </main>
   );
 }
