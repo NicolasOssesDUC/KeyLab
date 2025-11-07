@@ -154,15 +154,7 @@ function SimuladorPago() {
 
   return (
     <Container className="py-5" style={{ marginTop: '80px', maxWidth: '800px' }}>
-      <h1 className="mb-4 text-center">💳 Simulador de Pago</h1>
-      
-      <Alert variant="info" className="mb-4">
-        <strong>💡 Instrucciones del Simulador:</strong>
-        <ul className="mb-0 mt-2">
-          <li><strong>Pago Aceptado:</strong> Ingresa una tarjeta que termine en número PAR (ej: 4532 1234 5678 9012)</li>
-          <li><strong>Pago Rechazado:</strong> Ingresa una tarjeta que termine en número IMPAR (ej: 4532 1234 5678 9013)</li>
-        </ul>
-      </Alert>
+      <h1 className="mb-4 text-center">💳 Pago Seguro</h1>
 
       <div className="row">
         {/* Formulario de pago */}
