@@ -154,13 +154,15 @@ function Carrito() {
                 <h5 className="text-primary">${total.toLocaleString('es-CL')}</h5>
               </div>
               
-              <Button 
-                variant="success" 
-                className="w-100 mb-2"
-                size="lg"
-              >
-                💳 Proceder al Pago
-              </Button>
+              <Link to="/simulador-pago" className="w-100 mb-2 d-block">
+                <Button 
+                  variant="success" 
+                  className="w-100"
+                  size="lg"
+                >
+                  💳 Proceder al Pago
+                </Button>
+              </Link>
               
               <Link to="/productos" className="btn btn-outline-primary w-100 mb-2">
                 ← Seguir Comprando

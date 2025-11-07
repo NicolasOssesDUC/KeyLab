@@ -21,6 +21,9 @@ import TestPagination from './pages/TestPagination';
 import TestModal from './pages/TestModal';
 import DetalleProducto from "./pages/DetalleProducto";
 import Admin from './pages/Admin';
+import SimuladorPago from './pages/SimuladorPago';
+import PagoExitoso from './pages/PagoExitoso';
+import PagoRechazado from './pages/PagoRechazado';
 import { Navigate } from 'react-router-dom';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -56,6 +59,9 @@ function App() {
         <Route path="/test-pagination" element={<TestPagination />} />
         <Route path="/test-modal" element={<TestModal />} />
         <Route path="/producto/:id" element={<DetalleProducto />} />
+        <Route path="/simulador-pago" element={<SimuladorPago />} />
+        <Route path="/pago-exitoso" element={<PagoExitoso />} />
+        <Route path="/pago-rechazado" element={<PagoRechazado />} />
       </Routes>
       <Footer />
     </BrowserRouter>

@@ -128,7 +128,7 @@ export function CartProvider({ children }) {
     );
   };
 
-  // Vaciar carrito
+  // Vaciar carrito con confirmación
   const clearCart = () => {
     Swal.fire({
       title: '¿Vaciar carrito?',
@@ -150,6 +150,11 @@ export function CartProvider({ children }) {
         });
       }
     });
+  };
+
+  // Vaciar carrito sin confirmación (para después de pago exitoso)
+  const clearCartSilent = () => {
+    setCart([]);
   };
 
   // Obtener total de items
@@ -179,6 +184,7 @@ export function CartProvider({ children }) {
     removeFromCart,
     updateQuantity,
     clearCart,
+    clearCartSilent,
     getTotalItems,
     getTotalPrice,
     getItemQuantity,
