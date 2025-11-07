@@ -9,7 +9,7 @@ function Switches() {
     <Container className="productos">
       <h1 className="text-center mb-4">Switches</h1>
       {switches.length === 0 ? (
-        <p className="text-center">No hay cases disponibles.</p>
+        <p className="text-center">No hay switches disponibles.</p>
       ) : (
         <ProductGrid productos={switches} />
       )}
