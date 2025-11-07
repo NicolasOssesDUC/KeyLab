@@ -3,6 +3,7 @@ import { Navbar as BsNavbar, Nav, NavDropdown, Container } from 'react-bootstrap
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
+
 function Navbar() {
   const { user, logout } = useAuth();
   const { getTotalItems } = useCart();
@@ -26,6 +27,7 @@ function Navbar() {
               <NavDropdown.Item as={Link} to="/keycaps">Key Caps</NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/switches">Switches</NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/cases">Cases</NavDropdown.Item>
+              
             </NavDropdown>
 
             <Nav.Link as={Link} to="/contacto" className="nav-link">
@@ -38,8 +40,12 @@ function Navbar() {
               Ubicación
             </Nav.Link>
 
-            
-            {user ? (
+            {user?.rol === 'Administrador' && (
+                <Nav.Link as={Link} to="/admin" className="nav-link">
+                  Panel de control
+                  </Nav.Link>
+                  )}
+                  {user ? (
               <>
                 <Nav.Link
                   disabled
