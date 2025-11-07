@@ -121,12 +121,6 @@ function PagoRechazado() {
         </Button>
       </div>
 
-      <div className="mt-4 text-muted small">
-        <p className="mb-0">
-          <strong>💡 Tip:</strong> En el simulador, usa tarjetas que terminen en número PAR para pagos exitosos
-        </p>
-      </div>
-
       <style>{`
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
