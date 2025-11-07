@@ -79,7 +79,7 @@ describe("Login", () => {
   });
 
   it("redirige a /admin si el login es exitoso con rol Administrador", () => {
-    mockLogin.mockReturnValueOnce(true);
+    mockLogin.mockReturnValueOnce({ rol: "Administrador" });
     localStorage.setItem("usuarioActivo", JSON.stringify({ rol: "Administrador" }));
 
     renderLogin();

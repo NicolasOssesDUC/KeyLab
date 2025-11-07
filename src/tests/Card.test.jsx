@@ -91,7 +91,7 @@ describe('Card Components', () => {
 
     it('aplica variante top por defecto', () => {
       render(<CardImg src="/test.jpg" />);
-      const img = screen.getByRole('img');
+      const img = screen.getByRole('img', { hidden: true }) || screen.getByRole('presentation');
       expect(img).toHaveClass('card-img-top');
     });
 

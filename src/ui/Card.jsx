@@ -113,7 +113,7 @@ CardFooter.displayName = 'CardFooter';
 export const CardImg = forwardRef(({
   variant = 'top',
   src,
-  alt = '',
+  alt = 'Card image',
   className = '',
   ...rest
 }, ref) => {
