@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.keylab.backend.model.dto.UsuarioRegisterDTO;
+import com.keylab.backend.model.dto.UsuarioResponseDTO;
+
 import com.keylab.backend.model.Usuario;
 import com.keylab.backend.service.UsuarioService;
 
@@ -22,13 +25,13 @@ public class UsuarioController {
 
 
     @GetMapping("/all")
-    public List<Usuario> getAllUsuarios() {
+    public List<UsuarioResponseDTO> getAllUsuarios() {
         return usuarioService.getAllUsuarios();
     }
 
     @PostMapping("/save")
-    public Usuario postUsuario(@RequestBody Usuario entity) {
-        return usuarioService.createUsuario(entity);
+    public UsuarioResponseDTO postUsuario(@RequestBody UsuarioRegisterDTO registroDTO) {
+        return usuarioService.createUsuario(registroDTO);
     }
     
 }
