@@ -3,29 +3,53 @@ package com.keylab.backend.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import com.keylab.backend.model.Producto;
 import com.keylab.backend.service.ProductoService;
-import org.springframework.web.bind.annotation.RequestBody; 
+
 
 @RestController
-@RequestMapping("/api/productos")
+@RequestMapping("/api/v1/productos")
+@CrossOrigin("*")
 public class ProductoController {
 
     @Autowired
-    private ProductoService productoService;   
+    private ProductoService productoService;
 
-    @GetMapping("/all")
+    // Obtener todos los productos
+    @GetMapping
     public List<Producto> getAllProductos() {
         return productoService.getAllProductos();
     }
 
-    @PostMapping("/save")
-    public Producto postProducto(@RequestBody Producto entity) {
-        return productoService.createProducto(entity);
+    // Obtener solo activos (si lo agregaste en el service)
+    @GetMapping("/activos")
+    public List<Producto> getProductosActivos() {
+        return productoService.getProductosActivos();
     }
-    
+
+    // Buscar producto por id
+    @GetMapping("/{id}")
+    public Producto getProductoById(@PathVariable Long id) {
+        return productoService.getProductoById(id);
+    }
+
+    // Crear producto
+    @PostMapping
+    public Producto createProducto(@RequestBody Producto producto) {
+        return productoService.createProducto(producto);
+    }
+
+    // Actualizar producto
+    @PutMapping("/{id}")
+    public Producto updateProducto(@PathVariable Long id, @RequestBody Producto producto) {
+        return productoService.updateProducto(id, producto);
+    }
+
+    // Eliminar producto
+    @DeleteMapping("/{id}")
+    public void deleteProducto(@PathVariable Long id) {
+        productoService.deleteProducto(id);
+    }
 }

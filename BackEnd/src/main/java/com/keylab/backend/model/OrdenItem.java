@@ -4,15 +4,7 @@ import java.time.OffsetDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,10 +29,11 @@ public class OrdenItem {
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
 
-    @Column(name = "producto_nombre", nullable = false)
+    // snapshot del producto al momento de la compra
+    @Column(name = "producto_nombre")
     private String productoNombre;
 
-    @Column(name = "producto_categoria", nullable = false)
+    @Column(name = "producto_categoria")
     private String productoCategoria;
 
     @Column(name = "producto_imagen_url")
@@ -50,16 +43,28 @@ public class OrdenItem {
     private Integer cantidad;
 
     @Column(name = "precio_unitario", nullable = false)
-    private Integer precioUnitario;
+    private Double precioUnitario;
 
-    private Integer subtotal;
+    private Double subtotal;
 
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
 
+    @Column(name = "updated_at")
+    private OffsetDateTime updatedAt;
+
+
+    // se ejecuta al crear
     @PrePersist
     protected void onCreate() {
         this.createdAt = OffsetDateTime.now();
+        calcularSubtotal();
+    }
+
+    // se ejecuta al actualizar
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = OffsetDateTime.now();
         calcularSubtotal();
     }
 
