@@ -1,15 +1,6 @@
 package com.keylab.backend.model;
 
-
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,12 +20,10 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)   // email único y obligatorio
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)   // la contraseña no puede ser nula
-    private String password;
-
+    // Contraseña hasheada
     @Column(nullable = false, name = "password_hash")
     private String passwordHash;
 
@@ -44,17 +33,17 @@ public class Usuario {
     @Column(nullable = false)
     private String apellido;
 
-    @Column(length = 20)  // por ejemplo
+    @Column(length = 20)
     private String telefono;
 
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
 
     @Column(nullable = false)
-    private String rol;
+    private String rol;   // ADMIN o CLIENTE
 
     @Column(nullable = false)
-    private boolean activo;
+    private boolean activo = true;
 
     @Column(nullable = false, name = "created_at")
     private OffsetDateTime createdAt;
@@ -66,7 +55,7 @@ public class Usuario {
     private OffsetDateTime ultimoLogin;
 
 
-    // ASIGNACIONES PREDEFINIDAS DE FECHAS Y HORAS
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = OffsetDateTime.now();
@@ -78,6 +67,5 @@ public class Usuario {
         this.updatedAt = OffsetDateTime.now();
     }
 
-    
 }
 

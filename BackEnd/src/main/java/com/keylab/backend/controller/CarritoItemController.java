@@ -3,45 +3,97 @@ package com.keylab.backend.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.keylab.backend.service.CarritoItemService;
-
-import org.springframework.web.bind.annotation.RequestBody; 
+import org.springframework.web.bind.annotation.*;
 
 import com.keylab.backend.model.CarritoItem;
+import com.keylab.backend.service.CarritoItemService;
+
+
+
+
+
+
+
 
 @RestController
-@RequestMapping("/api/carrito-items")  
+@RequestMapping("/api/v1/carrito")
+@CrossOrigin("*")
 public class CarritoItemController {
 
-    @Autowired
+    @Autowired  
     private CarritoItemService carritoItemService;
 
-    @GetMapping("/all")
-    public List<CarritoItem> getAllCarritoItems() {
-        return carritoItemService.getAllCarritoItems();
+    // ✅ 1) Obtener el carrito de un usuario
+    // GET /api/v1/carrito/usuario/{usuarioId}
+    @GetMapping("/usuario/{usuarioId}")
+    public List<CarritoItem> getCarritoByUsuario(@PathVariable Long usuarioId) {
+        return carritoItemService.getCarritoByUsuario(usuarioId);
     }
 
-    @PostMapping("/save")
-    public CarritoItem postCarritoItem(@RequestBody CarritoItem entity) {    
-        return carritoItemService.createCarritoItem(entity);
-    }  
-
-    @GetMapping("/{id}")
-    public CarritoItem getCarritoItem(@PathVariable Long id) {
-        return carritoItemService.getCarritoItemById(id);
+    // ✅ 2) Obtener un item de carrito por id
+    // GET /api/v1/carrito/item/{itemId}
+    @GetMapping("/item/{itemId}")
+    public CarritoItem getCarritoItemById(@PathVariable Long itemId) {
+        return carritoItemService.getCarritoItemById(itemId);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteCarritoItem(@PathVariable Long id) {
-        carritoItemService.deleteCarritoItem(id);
+    // ✅ 3) Agregar un producto al carrito
+    // POST /api/v1/carrito/agregar
+    @PostMapping("/agregar")
+    public CarritoItem agregarAlCarrito(@RequestBody AgregarCarritoRequest request) {
+        return carritoItemService.agregarAlCarrito(
+                request.getUsuarioId(),
+                request.getProductoId(),
+                request.getCantidad()
+        );
+    }
+
+    // ✅ 4) Actualizar cantidad de un item del carrito
+    // PUT /api/v1/carrito/item/{itemId}
+    @PutMapping("/item/{itemId}")
+    public CarritoItem actualizarCantidad(@PathVariable Long itemId,
+                                          @RequestBody ActualizarCantidadRequest request) {
+        return carritoItemService.actualizarCantidad(itemId, request.getCantidad());
+    }
+
+    // ✅ 5) Eliminar un item del carrito
+    // DELETE /api/v1/carrito/item/{itemId}
+    @DeleteMapping("/item/{itemId}")
+    public void deleteCarritoItem(@PathVariable Long itemId) {
+        carritoItemService.deleteCarritoItem(itemId);
+    }
+
+    // ✅ 6) Vaciar carrito completo de un usuario
+    // DELETE /api/v1/carrito/usuario/{usuarioId}
+    @DeleteMapping("/usuario/{usuarioId}")
+    public void vaciarCarrito(@PathVariable Long usuarioId) {
+        carritoItemService.vaciarCarrito(usuarioId);
     }
 
 
-    
+    // ====== DTOs simples para las peticiones ======
+
+    // Body para /agregar
+    public static class AgregarCarritoRequest {
+        private Long usuarioId;
+        private Long productoId;
+        private int cantidad;
+
+        public Long getUsuarioId() { return usuarioId; }
+        public void setUsuarioId(Long usuarioId) { this.usuarioId = usuarioId; }
+
+        public Long getProductoId() { return productoId; }
+        public void setProductoId(Long productoId) { this.productoId = productoId; }
+
+        public int getCantidad() { return cantidad; }
+        public void setCantidad(int cantidad) { this.cantidad = cantidad; }
+    }
+
+    // Body para actualizar cantidad
+    public static class ActualizarCantidadRequest {
+        private int cantidad;
+
+        public int getCantidad() { return cantidad; }
+        public void setCantidad(int cantidad) { this.cantidad = cantidad; }
+    }
 }
