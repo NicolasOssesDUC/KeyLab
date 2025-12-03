@@ -1,14 +1,17 @@
 package com.keylab.backend.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.keylab.backend.model.CarritoItem;
 import com.keylab.backend.model.Orden;
 import com.keylab.backend.model.OrdenItem;
 import com.keylab.backend.model.Usuario;
+import com.keylab.backend.repository.CarritoItemRepository;
 import com.keylab.backend.repository.OrdenRepository;
 import com.keylab.backend.repository.UsuarioRepository;
 
@@ -20,6 +23,9 @@ public class OrdenService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private CarritoItemRepository carritoItemRepository;
 
     // Listar todas las órdenes (admin)
     public List<Orden> getAllOrdenes() {
@@ -81,6 +87,61 @@ public class OrdenService {
 
         // 6) @PrePersist en la entidad Orden va a llamar calcularTotales()
         return ordenRepository.save(orden);
+    }
+
+    // =================== CHECKOUT DESDE CARRITO ===================
+
+    public Orden crearOrdenDesdeCarrito(Long usuarioId) {
+        // 1) Buscar usuario
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + usuarioId));
+
+        // 2) Obtener items del carrito
+        List<CarritoItem> itemsCarrito = carritoItemRepository.findByUsuario(usuario);
+        if (itemsCarrito.isEmpty()) {
+            throw new RuntimeException("El carrito está vacío, no se puede crear una orden");
+        }
+
+        // 3) Crear la orden base
+        Orden orden = new Orden();
+        orden.setId(null);
+        orden.setUsuario(usuario);
+        orden.setEstado("PENDIENTE");
+        orden.setNumeroOrden("ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+
+        // Opcional: dejar en 0 por defecto
+        if (orden.getDescuento() == null) {
+            orden.setDescuento(0.0);
+        }
+        if (orden.getCostoEnvio() == null) {
+            orden.setCostoEnvio(0.0);
+        }
+
+        // 4) Convertir CarritoItem -> OrdenItem
+        List<OrdenItem> itemsOrden = new ArrayList<>();
+
+        for (CarritoItem ci : itemsCarrito) {
+            OrdenItem oi = new OrdenItem();
+            oi.setId(null);
+            oi.setOrden(orden);
+            oi.setProducto(ci.getProducto());
+            oi.setCantidad(ci.getCantidad());
+            oi.setPrecioUnitario(ci.getPrecioUnitario()); // mismo precio que en el carrito
+
+            // El subtotal se calcula en OrdenItem con calcularSubtotal() (@PrePersist/@PreUpdate)
+            itemsOrden.add(oi);
+        }
+
+        // IMPORTANTE: el nombre del campo en Orden es "items"
+        orden.setItems(itemsOrden);
+
+        // 5) Guardar orden (calcularTotales() se ejecuta en @PrePersist)
+        Orden guardada = ordenRepository.save(orden);
+
+        // 6) Vaciar carrito del usuario
+        carritoItemRepository.deleteByUsuario(usuario);
+
+        return guardada;
     }
 
     // Eliminar orden
