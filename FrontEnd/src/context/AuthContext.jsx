@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { loginRequest } from '../utils/authApi'; // 👈 IMPORTANTE: habla con el backend
 
 // Contexto principal
 const AuthContext = createContext(null);
@@ -31,20 +32,19 @@ export function AuthProvider({ children }) {
     }
   }, [user]);
 
-  // Login por email + password → devuelve el usuario o null
-  const login = (email, password) => {
-    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-    const found = usuarios.find(
-      (u) =>
-        String(u.email).trim() === String(email).trim() &&
-        String(u.password) === String(password)
-    );
-    if (!found) return null;
-    setUser(found); // ya guarda en sessionStorage por el useEffect
-    return found;   // devolvemos el usuario
+  // 🔐 Login REAL por email + password → llama al backend y devuelve los datos
+  const login = async (email, password) => {
+    // Llama a /api/auth/authenticate
+    const data = await loginRequest(email, password);
+
+    // data debería ser algo como { token, email, rol, ... }
+    setUser(data); // se guarda también en sessionStorage por el useEffect
+
+    return data;   // 👈 Login.jsx usa esto para decidir a dónde redirigir
   };
 
-  // Registro de nuevo usuario
+  // (por ahora) Registro de nuevo usuario sigue usando localStorage
+  // Luego lo podemos cambiar para que también use el backend (/api/auth/register)
   const register = (usuario) => {
     const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
     const exists = usuarios.some(
@@ -54,14 +54,13 @@ export function AuthProvider({ children }) {
     usuarios.push(usuario);
     localStorage.setItem('usuarios', JSON.stringify(usuarios));
     setUser(usuario);
-    return usuario; // devolvemos el usuario
+    return usuario;
   };
-
 
   // Cerrar sesión
   const logout = () => {
     setUser(null);
-    window.location.reload(); // opcional para refrescar la UI
+    window.location.reload(); // opcional, refresca UI
   };
 
   return (
