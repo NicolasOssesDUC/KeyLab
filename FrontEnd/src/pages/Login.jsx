@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ALLOWED_EMAIL_DOMAINS, seedAdminUser } from '../utils/auth';
-import { useAuth } from '../context/AuthContext'; // ⚡ Importamos el contexto
+import { useAuth } from '../context/AuthContext';
+import { ALLOWED_EMAIL_DOMAINS } from '../utils/auth'; // ✅ solo el dominio, sin seedAdminUser
 
 function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({ email: '', password: '' });
+  const [generalError, setGeneralError] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth(); // ⚡ Obtenemos la función de login desde el contexto
+  const { login } = useAuth(); // login asíncrono que llama al backend
 
   useEffect(() => {
     document.body.classList.add('login-body');
-    seedAdminUser(); // Crea el admin si no existe
     return () => {
       document.body.classList.remove('login-body');
     };
@@ -51,9 +51,10 @@ function Login() {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+    setGeneralError('');
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const currentErrors = {
@@ -65,22 +66,23 @@ function Login() {
     const hasErrors = Object.values(currentErrors).some(Boolean);
     if (hasErrors) return;
 
-    // Intentamos logear con los datos desde el contexto (usa localStorage internamente)
-    // Intentamos logear con los datos desde el contexto
-    const u = login(form.email.trim(), form.password.trim());
+    try {
+      // 🔐 Login REAL contra el backend (AuthContext -> /api/auth/authenticate)
+      const data = await login(form.email.trim(), form.password.trim());
+      // data debería incluir { token, email, rol } si tu AuthContext retorna eso
 
-    if (!u) {
-    alert('Correo o contraseña incorrectos.');
-    return;
-    }
+      const rol = (data?.rol || '').toUpperCase();
 
-    // ✅ Redirección según el rol (rutas válidas)
-    if (u.rol === 'Administrador') {
-    navigate('/admin');
-    } else {
-    navigate('/');             // tu Home está en "/"
+      if (rol === 'ADMIN' || rol === 'ADMINISTRADOR') {
+        navigate('/admin');
+      } else {
+        navigate('/'); // Home
+      }
+    } catch (err) {
+      console.error(err);
+      setGeneralError('Correo o contraseña incorrectos.');
     }
-      };
+  };
 
   return (
     <main className="pt-5">
@@ -151,6 +153,12 @@ function Login() {
                   </span>
                 </div>
 
+                {generalError && (
+                  <p className="error-message" style={{ textAlign: 'center' }}>
+                    {generalError}
+                  </p>
+                )}
+
                 <div className="form-actions">
                   <button type="submit" className="btn btn-primary">
                     Comencemos
@@ -159,7 +167,7 @@ function Login() {
 
                 <div className="separator">o</div>
 
-                
+
 
                 <div className="login-links">
                   <Link to="/pass-recov" className="link-accent">

@@ -27,9 +27,17 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                // Rutas públicas: Login, Registro, Swagger, Listar Productos
-                .requestMatchers("/api/auth/**", "/api/productos/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                // Todo lo demás requiere autenticación
+                //  Rutas públicas: auth, productos (catálogo), swagger
+                .requestMatchers(
+                    "/api/auth/**",
+                    "/api/v1/productos/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
+                ).permitAll()
+                // (Opcional) permitir registro de usuarios sin token:
+                // .requestMatchers(HttpMethod.POST, "/api/v1/usuarios").permitAll()
+                //  Todo lo demás requiere autenticación
                 .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
