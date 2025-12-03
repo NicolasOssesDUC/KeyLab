@@ -30,44 +30,61 @@ public class Orden {
     @Column(nullable = false)
     private String estado = "PENDIENTE";
 
-    private Integer subtotal;
-    private Integer descuento;
-    @Column(name = "costo_envio")
-    private Integer costoEnvio;
-    private Integer total;
+    private Double subtotal = 0.0;
+    private Double descuento = 0.0;
 
+    @Column(name = "costo_envio")
+    private Double costoEnvio = 0.0;
+
+    private Double total = 0.0;
+
+    // Dirección de envío
     @Column(name = "direccion_envio_calle")
     private String direccionEnvioCalle;
+
     @Column(name = "direccion_envio_numero")
     private String direccionEnvioNumero;
+
     @Column(name = "direccion_envio_departamento")
     private String direccionEnvioDepartamento;
+
     @Column(name = "direccion_envio_comuna")
     private String direccionEnvioComuna;
+
     @Column(name = "direccion_envio_ciudad")
     private String direccionEnvioCiudad;
+
     @Column(name = "direccion_envio_region")
     private String direccionEnvioRegion;
+
     @Column(name = "direccion_envio_codigo_postal")
     private String direccionEnvioCodigoPostal;
 
+    // Contacto
     @Column(name = "contacto_nombre")
     private String contactoNombre;
+
     @Column(name = "contacto_telefono")
     private String contactoTelefono;
+
     @Column(name = "contacto_email")
     private String contactoEmail;
 
     private String notas;
 
+    // Fechas automáticas
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
+
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
+
     @Column(name = "pagada_at")
     private OffsetDateTime pagadaAt;
+
     @Column(name = "enviada_at")
     private OffsetDateTime enviadaAt;
+
     @Column(name = "entregada_at")
     private OffsetDateTime entregadaAt;
 
@@ -90,12 +107,14 @@ public class Orden {
 
     public void calcularTotales() {
         this.subtotal = items.stream()
-                .mapToInt(item -> item.getSubtotal() != null ? item.getSubtotal() : 0)
+                .mapToDouble(item -> item.getSubtotal() != null ? item.getSubtotal() : 0.0)
                 .sum();
 
-        if (this.descuento == null) this.descuento = 0;
-        if (this.costoEnvio == null) this.costoEnvio = 0;
+        if (this.descuento == null) descuento = 0.0;
+        if (this.costoEnvio == null) costoEnvio = 0.0;
 
-        this.total = this.subtotal - this.descuento + this.costoEnvio;
+        this.total = subtotal - descuento + costoEnvio;
+
+        if (this.total < 0) this.total = 0.0;
     }
 }

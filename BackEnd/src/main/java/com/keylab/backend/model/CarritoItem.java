@@ -2,16 +2,7 @@ package com.keylab.backend.model;
 
 import java.time.OffsetDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,10 +26,13 @@ public class CarritoItem {
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
 
+    @Column(nullable = false)
     private Integer cantidad;
 
-    @Column(name = "precio_unitario")
-    private Integer precioUnitario;
+    @Column(name = "precio_unitario", nullable = false)
+    private Double precioUnitario;
+
+    private Double subtotal;
 
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
@@ -50,10 +44,18 @@ public class CarritoItem {
     protected void onCreate() {
         this.createdAt = OffsetDateTime.now();
         this.updatedAt = OffsetDateTime.now();
+        calcularSubtotal();
     }
 
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = OffsetDateTime.now();
+        calcularSubtotal();
+    }
+
+    private void calcularSubtotal() {
+        if (cantidad != null && precioUnitario != null) {
+            this.subtotal = cantidad * precioUnitario;
+        }
     }
 }
