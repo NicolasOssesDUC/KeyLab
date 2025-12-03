@@ -40,4 +40,9 @@ public class OrdenController {
     public void deleteOrden(@PathVariable Long id) {
         ordenService.deleteOrden(id);
     }
+
+    @PostMapping("/checkout/{usuarioId}")
+    public Orden checkout(@PathVariable Long usuarioId) {
+        return ordenService.crearOrdenDesdeCarrito(usuarioId);
+    }
 }
