@@ -1,13 +1,12 @@
 package com.keylab.backend.controller;
 
-import java.util.List;
-
+import com.keylab.backend.model.dto.OrdenCreateDTO;
+import com.keylab.backend.model.dto.OrdenResponseDTO;
+import com.keylab.backend.service.OrdenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.keylab.backend.model.Orden;
-import com.keylab.backend.service.OrdenService;
-
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/ordenes")
@@ -17,32 +16,48 @@ public class OrdenController {
     @Autowired
     private OrdenService ordenService;
 
-    // GET /api/v1/ordenes -> listar todas las órdenes (admin)
-    @GetMapping
-    public List<Orden> getAllOrdenes() {
-        return ordenService.getAllOrdenes();
+    // ============================================
+    // 1) Crear una orden
+    // POST /api/v1/ordenes
+    // ============================================
+    @PostMapping
+    public OrdenResponseDTO creteOrden(@RequestBody OrdenCreateDTO dto) {
+        return ordenService.createOrden(dto);
     }
 
-    // GET /api/v1/ordenes/{id} -> obtener una orden por id
+    // ============================================
+    // 2) Obtener una orden por ID
+    // GET /api/v1/ordenes/{id}
+    // ============================================
     @GetMapping("/{id}")
-    public Orden getOrden(@PathVariable Long id) {
+    public OrdenResponseDTO getOrdenById(@PathVariable Long id) {
         return ordenService.getOrdenById(id);
     }
 
-    // POST /api/v1/ordenes -> crear una nueva orden
-    @PostMapping
-    public Orden crearOrden(@RequestBody Orden orden) {
-        return ordenService.createOrden(orden);
+    // ============================================
+    // 3) Obtener todas las órdenes de un usuario
+    // GET /api/v1/ordenes/usuario/{usuarioId}
+    // ============================================
+    @GetMapping("/usuario/{usuarioId}")
+    public List<OrdenResponseDTO> getOrdenesByUsuario(@PathVariable Long usuarioId) {
+        return ordenService.getOrdenesByUsuarioId(usuarioId);
     }
 
-    // DELETE /api/v1/ordenes/{id} -> eliminar una orden
+    // ============================================
+    // 4) Obtener todas las órdenes (admin)
+    // GET /api/v1/ordenes
+    // ============================================
+    @GetMapping
+    public List<OrdenResponseDTO> getAllOrdenes() {
+        return ordenService.getAllOrdenes();
+    }
+
+    // ============================================
+    // 5) Eliminar una orden
+    // DELETE /api/v1/ordenes/{id}
+    // ============================================
     @DeleteMapping("/{id}")
     public void deleteOrden(@PathVariable Long id) {
         ordenService.deleteOrden(id);
-    }
-
-    @PostMapping("/checkout/{usuarioId}")
-    public Orden checkout(@PathVariable Long usuarioId) {
-        return ordenService.crearOrdenDesdeCarrito(usuarioId);
     }
 }

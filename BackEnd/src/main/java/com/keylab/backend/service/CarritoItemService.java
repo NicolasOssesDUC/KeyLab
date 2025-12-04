@@ -1,6 +1,7 @@
 package com.keylab.backend.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Service;
 import com.keylab.backend.model.CarritoItem;
 import com.keylab.backend.model.Producto;
 import com.keylab.backend.model.Usuario;
+import com.keylab.backend.model.dto.CarritoItemCreateDTO;
+import com.keylab.backend.model.dto.CarritoItemResponseDTO;
 import com.keylab.backend.repository.CarritoItemRepository;
 import com.keylab.backend.repository.ProductoRepository;
 import com.keylab.backend.repository.UsuarioRepository;
@@ -24,97 +27,150 @@ public class CarritoItemService {
     @Autowired
     private ProductoRepository productoRepository;
 
-    // ====== TUS MÉTODOS ORIGINALES (CRUD GENÉRICO) ======
 
-    public List<CarritoItem> getAllCarritoItems() {
-        return carritoItemRepository.findAll();
-    }
-    
-    public CarritoItem getCarritoItemById(Long id) {
-        return carritoItemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Item de carrito no encontrado con id: " + id));
+    // ======================================
+    //              MAPEOS
+    // ======================================
+
+    private CarritoItemResponseDTO toResponseDTO(CarritoItem item) {
+        return new CarritoItemResponseDTO(
+            item.getId(),
+            item.getProducto().getId(),
+            item.getProducto().getNombre(),
+            item.getCantidad(),
+            item.getPrecioUnitario().intValue()
+        );
     }
 
-    public CarritoItem createCarritoItem(CarritoItem carritoItem) {
-        carritoItem.setId(null);
-        return carritoItemRepository.save(carritoItem);
+    private CarritoItem toEntity(CarritoItemCreateDTO dto) {
+        Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Producto producto = productoRepository.findById(dto.getProductoId())
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+        CarritoItem item = new CarritoItem();
+
+        item.setUsuario(usuario);
+        item.setProducto(producto);
+        item.setCantidad(dto.getCantidad());
+        item.setPrecioUnitario(producto.getPrecio());
+
+        return item;
+    }
+
+
+    // ======================================
+    //                CRUD
+    // ======================================
+
+    public List<CarritoItemResponseDTO> getAllCarritoItems() {
+        return carritoItemRepository.findAll()
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public CarritoItemResponseDTO getCarritoItemById(Long id) {
+        CarritoItem item = carritoItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Item no encontrado"));
+
+        return toResponseDTO(item);
+    }
+
+    public CarritoItemResponseDTO createCarritoItem(CarritoItemCreateDTO dto) {
+        CarritoItem item = toEntity(dto);
+
+        validarStock(item.getProducto(), dto.getCantidad());
+
+        carritoItemRepository.save(item);
+
+        return toResponseDTO(item);
     }
 
     public void deleteCarritoItem(Long id) {
-        CarritoItem item = getCarritoItemById(id);
+        CarritoItem item = carritoItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Item no encontrado"));
+
         carritoItemRepository.delete(item);
     }
 
-    // ====== MÉTODOS “DE CARRITO” REALES ======
 
-    // Ver carrito de un usuario
-    public List<CarritoItem> getCarritoByUsuario(Long usuarioId) {
+    // ======================================
+    //       MÉTODOS DEL CARRITO REAL
+    // ======================================
+
+    public List<CarritoItemResponseDTO> getCarritoByUsuario(Long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + usuarioId));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        return carritoItemRepository.findByUsuario(usuario);
+        return carritoItemRepository.findByUsuario(usuario)
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    // Agregar producto al carrito de un usuario
-    public CarritoItem agregarAlCarrito(Long usuarioId, Long productoId, int cantidad) {
-        if (cantidad <= 0) {
-            throw new RuntimeException("La cantidad debe ser mayor que 0");
-        }
+    public CarritoItemResponseDTO agregarAlCarrito(CarritoItemCreateDTO dto) {
+        Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + usuarioId));
+        Producto producto = productoRepository.findById(dto.getProductoId())
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        Producto producto = productoRepository.findById(productoId)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + productoId));
+        validarStock(producto, dto.getCantidad());
 
-        // Validación simple de stock
-        if (producto.getStock() < cantidad) {
-            throw new RuntimeException("No hay stock suficiente del producto");
-        }
-
-        // Si ya existe ese producto en el carrito, suma cantidad
+        // Si ya existe, suma cantidad
         return carritoItemRepository.findByUsuarioAndProducto(usuario, producto)
                 .map(itemExistente -> {
-                    int nuevaCantidad = itemExistente.getCantidad() + cantidad;
-                    if (producto.getStock() < nuevaCantidad) {
-                        throw new RuntimeException("No hay stock suficiente para la nueva cantidad");
-                    }
+                    int nuevaCantidad = itemExistente.getCantidad() + dto.getCantidad();
+
+                    validarStock(producto, nuevaCantidad);
+
                     itemExistente.setCantidad(nuevaCantidad);
                     itemExistente.setPrecioUnitario(producto.getPrecio());
-                    return carritoItemRepository.save(itemExistente);
+
+                    carritoItemRepository.save(itemExistente);
+
+                    return toResponseDTO(itemExistente);
                 })
                 .orElseGet(() -> {
-                    CarritoItem nuevo = new CarritoItem();
-                    nuevo.setUsuario(usuario);
-                    nuevo.setProducto(producto);
-                    nuevo.setCantidad(cantidad);
-                    nuevo.setPrecioUnitario(producto.getPrecio());
-                    return carritoItemRepository.save(nuevo);
+                    CarritoItem nuevo = toEntity(dto);
+                    carritoItemRepository.save(nuevo);
+                    return toResponseDTO(nuevo);
                 });
     }
 
-    // Actualizar cantidad de un item del carrito
-    public CarritoItem actualizarCantidad(Long itemId, int nuevaCantidad) {
+    public CarritoItemResponseDTO actualizarCantidad(Long itemId, int nuevaCantidad) {
         if (nuevaCantidad <= 0) {
             throw new RuntimeException("La cantidad debe ser mayor que 0");
         }
 
-        CarritoItem item = getCarritoItemById(itemId);
-        Producto producto = item.getProducto();
+        CarritoItem item = carritoItemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item no encontrado"));
 
-        if (producto.getStock() < nuevaCantidad) {
-            throw new RuntimeException("No hay stock suficiente para la nueva cantidad");
-        }
+        validarStock(item.getProducto(), nuevaCantidad);
 
         item.setCantidad(nuevaCantidad);
-        return carritoItemRepository.save(item);
+        carritoItemRepository.save(item);
+
+        return toResponseDTO(item);
     }
 
-    // Vaciar carrito de un usuario
     public void vaciarCarrito(Long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + usuarioId));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         carritoItemRepository.deleteByUsuario(usuario);
+    }
+
+
+    // ======================================
+    //             VALIDACIÓN
+    // ======================================
+
+    private void validarStock(Producto producto, int cantidad) {
+        if (producto.getStock() < cantidad) {
+            throw new RuntimeException("Stock insuficiente del producto");
+        }
     }
 }
