@@ -1,24 +1,21 @@
 import { useEffect, useState } from 'react';
-import { getProducts } from '../utils/productsApi.js'; // usa tu utils
+import { getProducts } from '../utils/productsApi.js';
 import { useCart } from '../context/CartContext';
 
 export default function ListaCategoricaDinamica({ categoria }) {
   const { addToCart } = useCart();
   const [items, setItems] = useState([]);
 
-  const load = () => {
-    const all = getProducts();
-    const filtered = all.filter(
-      p => String(p.categoria || '').toLowerCase() === String(categoria).toLowerCase()
-    );
-    setItems(filtered);
-  };
-
   useEffect(() => {
+    async function load() {
+      const all = await getProducts(); 
+      const filtered = all.filter(
+        p => String(p.categoria || '').toLowerCase() === categoria.toLowerCase()
+      );
+      setItems(filtered);
+    }
+
     load();
-    const onStorage = (e) => { if (e.key === 'productos') load(); };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
   }, [categoria]);
 
   if (!items.length) return null;

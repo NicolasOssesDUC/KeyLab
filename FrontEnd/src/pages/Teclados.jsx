@@ -3,18 +3,27 @@ import ProductGrid from "../components/ProductGrid";
 import { useEffect, useState } from "react";
 import ListaCategoricaDinamica from "../components/ListaCategoricaDinamica";
 
+// Importar el servicio centralizado
+import { getProducts } from "../utils/productsApi";
+
 function Teclados() {
   const [teclados, setTeclados] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/productos")
-      .then((res) => res.json())
-      .then((data) => {
-        // Filtrar en el frontend
-        setTeclados(data.filter((p) => p.categoria === "Teclados"));
-      })
-      .finally(() => setLoading(false));
+    async function loadTeclados() {
+      try {
+        const data = await getProducts(); // obtiene todo desde el backend
+        const filtrados = data.filter((p) => p.categoria === "Teclados");
+        setTeclados(filtrados);
+      } catch (error) {
+        console.error("Error cargando teclados:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadTeclados();
   }, []);
 
   return (
@@ -29,7 +38,6 @@ function Teclados() {
         <ProductGrid productos={teclados} />
       )}
 
-      {/* Si usas esta lista dinámica creada por ti, aquí puede seguir igual */}
       <ListaCategoricaDinamica categoria="Teclados" />
     </Container>
   );

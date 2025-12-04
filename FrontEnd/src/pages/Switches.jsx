@@ -3,18 +3,27 @@ import ProductGrid from "../components/ProductGrid";
 import { useEffect, useState } from "react";
 import ListaCategoricaDinamica from "../components/ListaCategoricaDinamica";
 
+// Importar servicio centralizado
+import { getProducts } from "../utils/productsApi";
+
 function Switches() {
   const [switches, setSwitches] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/productos")
-      .then((res) => res.json())
-      .then((data) => {
-        // Filtrar en el frontend igual que en Teclados
-        setSwitches(data.filter((p) => p.categoria === "Switches"));
-      })
-      .finally(() => setLoading(false));
+    async function loadSwitches() {
+      try {
+        const data = await getProducts(); // obtiene todos los productos
+        const filtrados = data.filter((p) => p.categoria === "Switches");
+        setSwitches(filtrados);
+      } catch (error) {
+        console.error("Error cargando switches:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadSwitches();
   }, []);
 
   return (
