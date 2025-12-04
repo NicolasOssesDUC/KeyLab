@@ -5,9 +5,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.keylab.backend.model.Producto;
+import com.keylab.backend.model.dto.ProductoCreateDTO;
+import com.keylab.backend.model.dto.ProductoResponseDTO;
+import com.keylab.backend.model.dto.ProductoUpdateDTO;
 import com.keylab.backend.service.ProductoService;
-
 
 @RestController
 @RequestMapping("/api/v1/productos")
@@ -19,32 +20,32 @@ public class ProductoController {
 
     // Obtener todos los productos
     @GetMapping
-    public List<Producto> getAllProductos() {
+    public List<ProductoResponseDTO> getAllProductos() {
         return productoService.getAllProductos();
     }
 
-    // Obtener solo activos (si lo agregaste en el service)
+    // Obtener solo activos
     @GetMapping("/activos")
-    public List<Producto> getProductosActivos() {
+    public List<ProductoResponseDTO> getProductosActivos() {
         return productoService.getProductosActivos();
     }
 
     // Buscar producto por id
     @GetMapping("/{id}")
-    public Producto getProductoById(@PathVariable Long id) {
+    public ProductoResponseDTO getProductoById(@PathVariable Long id) {
         return productoService.getProductoById(id);
     }
 
     // Crear producto
     @PostMapping
-    public Producto createProducto(@RequestBody Producto producto) {
-        return productoService.createProducto(producto);
+    public ProductoResponseDTO createProducto(@RequestBody ProductoCreateDTO productoDTO) {
+        return productoService.createProducto(productoDTO);
     }
 
     // Actualizar producto
     @PutMapping("/{id}")
-    public Producto updateProducto(@PathVariable Long id, @RequestBody Producto producto) {
-        return productoService.updateProducto(id, producto);
+    public ProductoResponseDTO updateProducto(@PathVariable Long id, @RequestBody ProductoUpdateDTO productoDTO) {
+        return productoService.updateProducto(id, productoDTO);
     }
 
     // Eliminar producto

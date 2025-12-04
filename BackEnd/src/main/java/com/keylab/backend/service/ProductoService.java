@@ -1,11 +1,15 @@
 package com.keylab.backend.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.keylab.backend.model.Producto;
+import com.keylab.backend.model.dto.ProductoCreateDTO;
+import com.keylab.backend.model.dto.ProductoResponseDTO;
+import com.keylab.backend.model.dto.ProductoUpdateDTO;
 import com.keylab.backend.repository.ProductoRepository;
 
 @Service
@@ -14,58 +18,110 @@ public class ProductoService {
     @Autowired
     private ProductoRepository productoRepository;
 
-    // Obtener todos los productos
-    public List<Producto> getAllProductos() {
-        return productoRepository.findAll();
+
+    // =========================
+    //     MAPEOS INTERNOS
+    // =========================
+
+    private ProductoResponseDTO toResponseDTO(Producto p) {
+        return new ProductoResponseDTO(
+            p.getId(),
+            p.getNombre(),
+            p.getDescripcion(),
+            p.getPrecio(),
+            p.getStock(),
+            p.getCategoria(),
+            p.getImagenUrl(),
+            p.isActivo() // disponible
+        );
     }
 
-    // Obtener solo los productos activos
-    public List<Producto> getProductosActivos() {
-        return productoRepository.findByActivoTrue();
+    private Producto toEntityFromCreate(ProductoCreateDTO dto) {
+        Producto p = new Producto();
+
+        p.setNombre(dto.getNombre());
+        p.setDescripcion(dto.getDescripcion());
+        p.setPrecio(dto.getPrecio());
+        p.setCategoria(dto.getCategoria());
+        p.setImagenUrl(dto.getImagenUrl());
+
+        p.setActivo(true);
+        p.setStock(0);
+        p.setSubcategoria(null);
+
+        return p;
     }
 
-    // Buscar un producto por id (devolver excepción si no existe)
-    public Producto getProductoById(Long id) {
-        return productoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + id));
+    private void applyUpdate(Producto existente, ProductoUpdateDTO dto) {
+        if (dto.getNombre() != null) existente.setNombre(dto.getNombre());
+        if (dto.getDescripcion() != null) existente.setDescripcion(dto.getDescripcion());
+        if (dto.getPrecio() != null) existente.setPrecio(dto.getPrecio());
+        if (dto.getStock() != null) existente.setStock(dto.getStock());
+        if (dto.getCategoria() != null) existente.setCategoria(dto.getCategoria());
+        if (dto.getImagenUrl() != null) existente.setImagenUrl(dto.getImagenUrl());
+        if (dto.getDisponible() != null) existente.setActivo(dto.getDisponible());
     }
 
-    // Crear producto
-    public Producto createProducto(Producto producto) {
 
-        validarProducto(producto);
+    // =========================
+    //     SERVICIOS CRUD
+    // =========================
 
-        producto.setId(null); // asegurar que se cree uno nuevo
-        producto.setActivo(true);
-        return productoRepository.save(producto);
+    public List<ProductoResponseDTO> getAllProductos() {
+        return productoRepository.findAll()
+            .stream()
+            .map(this::toResponseDTO)
+            .collect(Collectors.toList());
     }
 
-    // Actualizar un producto
-    public Producto updateProducto(Long id, Producto datos) {
-        Producto existente = getProductoById(id);
-
-        validarProducto(datos);
-
-        existente.setNombre(datos.getNombre());
-        existente.setPrecio(datos.getPrecio());
-        existente.setCategoria(datos.getCategoria());
-        existente.setSubcategoria(datos.getSubcategoria());
-        existente.setStock(datos.getStock());
-        existente.setDescripcion(datos.getDescripcion());
-        existente.setImagenUrl(datos.getImagenUrl());
-        existente.setActivo(datos.isActivo());
-
-        return productoRepository.save(existente);
+    public List<ProductoResponseDTO> getProductosActivos() {
+        return productoRepository.findByActivoTrue()
+            .stream()
+            .map(this::toResponseDTO)
+            .collect(Collectors.toList());
     }
 
-    // Eliminar un producto (podría ser lógica o física)
+    public ProductoResponseDTO getProductoById(Long id) {
+        Producto p = productoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + id));
+
+        return toResponseDTO(p);
+    }
+
+    public ProductoResponseDTO createProducto(ProductoCreateDTO dto) {
+        Producto nuevo = toEntityFromCreate(dto);
+
+        validarProducto(nuevo);
+
+        productoRepository.save(nuevo);
+
+        return toResponseDTO(nuevo);
+    }
+
+    public ProductoResponseDTO updateProducto(Long id, ProductoUpdateDTO dto) {
+        Producto existente = productoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + id));
+
+        applyUpdate(existente, dto);
+
+        validarProducto(existente);
+
+        productoRepository.save(existente);
+
+        return toResponseDTO(existente);
+    }
+
     public void deleteProducto(Long id) {
-        Producto producto = getProductoById(id);
+        Producto producto = productoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + id));
+
         productoRepository.delete(producto);
     }
 
 
-    // -------- VALIDACIONES ---------
+    // =========================
+    //       VALIDACIÓN
+    // =========================
 
     private void validarProducto(Producto producto) {
         if (producto.getPrecio() == null || producto.getPrecio() < 0) {
@@ -78,5 +134,4 @@ public class ProductoService {
             throw new RuntimeException("El nombre del producto es obligatorio");
         }
     }
-
 }

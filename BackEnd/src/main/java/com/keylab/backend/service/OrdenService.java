@@ -10,9 +10,15 @@ import org.springframework.stereotype.Service;
 import com.keylab.backend.model.CarritoItem;
 import com.keylab.backend.model.Orden;
 import com.keylab.backend.model.OrdenItem;
+import com.keylab.backend.model.Producto;
 import com.keylab.backend.model.Usuario;
+import com.keylab.backend.model.dto.OrdenCreateDTO;
+import com.keylab.backend.model.dto.OrdenItemCreateDTO;
+import com.keylab.backend.model.dto.OrdenItemResponseDTO;
+import com.keylab.backend.model.dto.OrdenResponseDTO;
 import com.keylab.backend.repository.CarritoItemRepository;
 import com.keylab.backend.repository.OrdenRepository;
+import com.keylab.backend.repository.ProductoRepository;
 import com.keylab.backend.repository.UsuarioRepository;
 
 @Service
@@ -27,126 +33,206 @@ public class OrdenService {
     @Autowired
     private CarritoItemRepository carritoItemRepository;
 
-    // Listar todas las órdenes (admin)
-    public List<Orden> getAllOrdenes() {
-        return ordenRepository.findAll();
+    @Autowired
+    private ProductoRepository productoRepository;
+
+    // ============================================================
+    //                      LISTAR / OBTENER
+    // ============================================================
+
+    public List<OrdenResponseDTO> getAllOrdenes() {
+        return ordenRepository.findAll()
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
     }
 
-    // Buscar orden por id (ahora lanza excepción si no existe)
-    public Orden getOrdenById(Long id) {
-        return ordenRepository.findById(id)
+    public OrdenResponseDTO getOrdenById(Long id) {
+        Orden orden = ordenRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Orden no encontrada con id: " + id));
+
+        return toResponseDTO(orden);
     }
 
-    // Listar órdenes de un usuario
-    public List<Orden> getOrdenesByUsuarioId(Long usuarioId) {
+    public List<OrdenResponseDTO> getOrdenesByUsuarioId(Long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + usuarioId));
 
-        return ordenRepository.findByUsuario(usuario);
+        return ordenRepository.findByUsuario(usuario)
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
     }
 
-    // Buscar una orden por su número
-    public Orden getOrdenByNumero(String numeroOrden) {
-        return ordenRepository.findByNumeroOrden(numeroOrden)
+    public OrdenResponseDTO getOrdenByNumero(String numeroOrden) {
+        Orden orden = ordenRepository.findByNumeroOrden(numeroOrden)
                 .orElseThrow(() -> new RuntimeException("Orden no encontrada con número: " + numeroOrden));
+
+        return toResponseDTO(orden);
     }
 
-    // Crear una orden (cuando ya viene armada desde el frontend)
-    // En tu proyecto lo ideal es crearla desde el carrito, pero esta versión igual es válida.
-    public Orden createOrden(Orden orden) {
 
-        // 1) Asegurar que es una nueva orden
-        orden.setId(null);
+    // ============================================================
+    //                      CREAR ORDEN MANUAL
+    // ============================================================
 
-        // 2) Generar número de orden si no viene
-        if (orden.getNumeroOrden() == null || orden.getNumeroOrden().isBlank()) {
-            orden.setNumeroOrden("ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
-        }
+    public OrdenResponseDTO createOrden(OrdenCreateDTO dto) {
 
-        // 3) Asegurar estado por defecto
-        if (orden.getEstado() == null || orden.getEstado().isBlank()) {
-            orden.setEstado("PENDIENTE");
-        }
+        Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + dto.getUsuarioId()));
 
-        // 4) Evitar nulos en valores numéricos
-        if (orden.getDescuento() == null) {
-            orden.setDescuento(0.0);
-        }
-        if (orden.getCostoEnvio() == null) {
-            orden.setCostoEnvio(0.0);
-        }
-
-        // 5) Enlazar items correctamente
-        if (orden.getItems() != null) {
-            for (OrdenItem item : orden.getItems()) {
-                item.setId(null);        // el ID debe crearse automáticamente
-                item.setOrden(orden);    // FK obligatoria
-            }
-        }
-
-        // 6) @PrePersist en la entidad Orden va a llamar calcularTotales()
-        return ordenRepository.save(orden);
-    }
-
-    // =================== CHECKOUT DESDE CARRITO ===================
-
-    public Orden crearOrdenDesdeCarrito(Long usuarioId) {
-        // 1) Buscar usuario
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + usuarioId));
-
-        // 2) Obtener items del carrito
-        List<CarritoItem> itemsCarrito = carritoItemRepository.findByUsuario(usuario);
-        if (itemsCarrito.isEmpty()) {
-            throw new RuntimeException("El carrito está vacío, no se puede crear una orden");
-        }
-
-        // 3) Crear la orden base
         Orden orden = new Orden();
         orden.setId(null);
         orden.setUsuario(usuario);
-        orden.setEstado("PENDIENTE");
+
         orden.setNumeroOrden("ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        orden.setEstado("PENDIENTE");
 
-        // Opcional: dejar en 0 por defecto
-        if (orden.getDescuento() == null) {
-            orden.setDescuento(0.0);
+        orden.setDescuento(0.0);
+        orden.setCostoEnvio(0.0);
+
+        // ------ mapear items ------
+        List<OrdenItem> items = new ArrayList<>();
+        if (dto.getItems() != null) {
+            for (OrdenItemCreateDTO itemDto : dto.getItems()) {
+                items.add(toOrdenItemEntity(itemDto, orden));
+            }
         }
-        if (orden.getCostoEnvio() == null) {
-            orden.setCostoEnvio(0.0);
+
+        orden.setItems(items);
+
+        Orden guardada = ordenRepository.save(orden);
+
+        return toResponseDTO(guardada);
+    }
+
+    // ============================================================
+    //              CREAR ORDEN AUTOGENERADA DESDE CARRITO
+    // ============================================================
+
+    public OrdenResponseDTO crearOrdenDesdeCarrito(Long usuarioId) {
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + usuarioId));
+
+        List<CarritoItem> carrito = carritoItemRepository.findByUsuario(usuario);
+        if (carrito.isEmpty()) {
+            throw new RuntimeException("El carrito está vacío.");
         }
 
-        // 4) Convertir CarritoItem -> OrdenItem
-        List<OrdenItem> itemsOrden = new ArrayList<>();
+        Orden orden = new Orden();
+        orden.setUsuario(usuario);
+        orden.setNumeroOrden("ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        orden.setEstado("PENDIENTE");
+        orden.setDescuento(0.0);
+        orden.setCostoEnvio(0.0);
 
-        for (CarritoItem ci : itemsCarrito) {
+        List<OrdenItem> items = new ArrayList<>();
+
+        for (CarritoItem ci : carrito) {
             OrdenItem oi = new OrdenItem();
-            oi.setId(null);
             oi.setOrden(orden);
             oi.setProducto(ci.getProducto());
             oi.setCantidad(ci.getCantidad());
-            oi.setPrecioUnitario(ci.getPrecioUnitario()); // mismo precio que en el carrito
-
-            // El subtotal se calcula en OrdenItem con calcularSubtotal() (@PrePersist/@PreUpdate)
-            itemsOrden.add(oi);
+            oi.setPrecioUnitario(ci.getPrecioUnitario());
+            items.add(oi);
         }
 
-        // IMPORTANTE: el nombre del campo en Orden es "items"
-        orden.setItems(itemsOrden);
+        orden.setItems(items);
 
-        // 5) Guardar orden (calcularTotales() se ejecuta en @PrePersist)
         Orden guardada = ordenRepository.save(orden);
 
-        // 6) Vaciar carrito del usuario
         carritoItemRepository.deleteByUsuario(usuario);
 
-        return guardada;
+        return toResponseDTO(guardada);
     }
 
-    // Eliminar orden
+    // ============================================================
+    //                        ELIMINAR
+    // ============================================================
+
     public void deleteOrden(Long id) {
-        Orden orden = getOrdenById(id);
+        Orden orden = ordenRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada con id: " + id));
+
         ordenRepository.delete(orden);
     }
+
+
+    // ============================================================
+    //                       MAPEOS PRIVADOS
+    // ============================================================
+
+    private OrdenItem toOrdenItemEntity(OrdenItemCreateDTO dto, Orden orden) {
+    OrdenItem item = new OrdenItem();
+    item.setOrden(orden);
+
+    Producto producto = productoRepository.findById(dto.getProductId())
+            .orElseThrow(() ->
+                    new RuntimeException("Producto no encontrado con id: " + dto.getProductId())
+            );
+
+    item.setProducto(producto);
+    item.setCantidad(dto.getQuantity());
+    item.setPrecioUnitario(producto.getPrecio());
+
+    return item;
+}
+
+    private OrdenResponseDTO toResponseDTO(Orden orden) {
+        OrdenResponseDTO dto = new OrdenResponseDTO();
+
+        dto.setId(orden.getId());
+        dto.setNumeroOrden(orden.getNumeroOrden());
+        dto.setEstado(orden.getEstado());
+
+        dto.setSubtotal(orden.getSubtotal().intValue());
+        dto.setDescuento(orden.getDescuento().intValue());
+        dto.setCostoEnvio(orden.getCostoEnvio().intValue());
+        dto.setTotal(orden.getTotal().intValue());
+
+        dto.setDireccionEnvioCalle(orden.getDireccionEnvioCalle());
+        dto.setDireccionEnvioNumero(orden.getDireccionEnvioNumero());
+        dto.setDireccionEnvioDepartamento(orden.getDireccionEnvioDepartamento());
+        dto.setDireccionEnvioComuna(orden.getDireccionEnvioComuna());
+        dto.setDireccionEnvioCiudad(orden.getDireccionEnvioCiudad());
+        dto.setDireccionEnvioRegion(orden.getDireccionEnvioRegion());
+        dto.setDireccionEnvioCodigoPostal(orden.getDireccionEnvioCodigoPostal());
+
+        dto.setContactoNombre(orden.getContactoNombre());
+        dto.setContactoTelefono(orden.getContactoTelefono());
+        dto.setContactoEmail(orden.getContactoEmail());
+
+        dto.setNotas(orden.getNotas());
+
+        dto.setCreatedAt(orden.getCreatedAt());
+        dto.setUpdatedAt(orden.getUpdatedAt());
+        dto.setPagadaAt(orden.getPagadaAt());
+        dto.setEnviadaAt(orden.getEnviadaAt());
+        dto.setEntregadaAt(orden.getEntregadaAt());
+
+        dto.setUsuarioId(orden.getUsuario().getId());
+
+        dto.setItems(
+                orden.getItems()
+                        .stream()
+                        .map(this::toOrdenItemDTO)
+                        .toList()
+        );
+
+        return dto;
+    }
+
+    private OrdenItemResponseDTO toOrdenItemDTO(OrdenItem item) {
+        OrdenItemResponseDTO dto = new OrdenItemResponseDTO();
+
+        dto.setId(item.getId());
+        dto.setProductoId(item.getProducto().getId());
+        dto.setCantidad(item.getCantidad());
+        dto.setPrecioUnitario(item.getPrecioUnitario());
+        dto.setSubtotal(item.getSubtotal());
+
+        return dto;
+    }
+
 }
