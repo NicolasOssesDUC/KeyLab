@@ -27,7 +27,7 @@ export default function ProductGrid({ productos }) {
             {/* Imagen en un wrapper */}
             <div className="card-img-wrapper">
               <Link to={`/producto/${producto.id}`}>
-                <CardImg src={producto.imagen} alt={producto.nombre} />
+                <CardImg src={producto.imagenUrl} alt={producto.nombre} />
               </Link>
             </div>
 
