@@ -7,40 +7,30 @@ import AdminProductos from './AdminProductos';
 import AdminUsuarios from './AdminUsuarios';
 import { getUsers } from '../utils/usersApi';
 import { getProducts } from '../utils/productsApi';
+import { getOrders } from '../utils/ordersApi'; // Nuevo import
 
 const TableComp = TableNS.default ?? TableNS.Table;
-
-// Helper para leer órdenes (sigue usando localStorage por ahora)
-function readOrders() {
-  try {
-    const raw = localStorage.getItem('ordenes');
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
-  }
-}
 
 export default function Admin() {
   const { user } = useAuth();
   const [stats, setStats] = useState({ users: 0, products: 0, orders: 0 });
+  const [recentOrders, setRecentOrders] = useState([]); // Estado para la tabla
 
-  // Carga asíncrona desde Backend
   const recompute = async () => {
     try {
-        // Ejecutamos las peticiones en paralelo
-        const [usuariosReal, productosReal] = await Promise.all([
+        const [usuariosReal, productosReal, ordenesReal] = await Promise.all([
             getUsers(),
-            getProducts()
+            getProducts(),
+            getOrders()
         ]);
         
-        const ordenes = readOrders(); // Mock por ahora
-
         setStats({
           users: usuariosReal.length,
           products: productosReal.length,
-          orders: ordenes.length,
+          orders: ordenesReal.length,
         });
+
+        setRecentOrders(ordenesReal); // Actualizar tabla de órdenes
     } catch (error) {
         console.error("Error cargando estadísticas:", error);
     }
@@ -50,7 +40,6 @@ export default function Admin() {
     recompute();
   }, []);
 
-  // Validación de Rol (Acepta 'Administrador' legacy o 'ADMIN' backend)
   if (!user || (user.rol !== 'Administrador' && user.rol !== 'ADMIN')) {
     return (
       <main className="container py-5">
@@ -62,10 +51,8 @@ export default function Admin() {
   const widgets = [
     { title: 'Usuarios',  value: stats.users,    desc: 'Registrados en el sistema' },
     { title: 'Productos', value: stats.products, desc: 'Activos' },
-    { title: 'Órdenes',   value: stats.orders,   desc: 'Hoy' },
+    { title: 'Órdenes',   value: stats.orders,   desc: 'Totales' },
   ];
-
-  const orders = readOrders();
 
   return (
     <main className="container py-5">
@@ -94,26 +81,25 @@ export default function Admin() {
       <TableComp striped hover responsive className="mt-2">
         <thead>
           <tr>
-            <th>#</th><th>Cliente</th><th>Total</th><th>Estado</th>
+            <th>#</th><th>Total</th><th>Estado</th><th>Fecha</th>
           </tr>
         </thead>
         <tbody>
-          {orders.length === 0 ? (
+          {recentOrders.length === 0 ? (
             <tr><td colSpan={4} className="text-center text-muted">Sin órdenes</td></tr>
           ) : (
-            orders.map(o => (
+            recentOrders.slice(0, 5).map(o => ( // Mostrar solo las últimas 5
               <tr key={o.id}>
                 <td>{o.id}</td>
-                <td>{o.cliente}</td>
                 <td>${(o.total ?? 0).toLocaleString('es-CL')}</td>
-                <td>{o.estado ?? '—'}</td>
+                <td><span className="badge bg-info text-dark">{o.estado ?? 'PENDIENTE'}</span></td>
+                <td>{new Date(o.fecha).toLocaleDateString()}</td>
               </tr>
             ))
           )}
         </tbody>
       </TableComp>
 
-      {/* Componentes CRUD de Productos y Usuarios */}
       <AdminProductos />
       <AdminUsuarios />
     </main>
