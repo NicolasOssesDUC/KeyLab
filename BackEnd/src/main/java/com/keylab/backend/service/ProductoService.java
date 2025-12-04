@@ -46,7 +46,8 @@ public class ProductoService {
         p.setImagenUrl(dto.getImagenUrl());
 
         p.setActivo(true);
-        p.setStock(0);
+        // Usar stock del DTO o 0 si es nulo
+        p.setStock(dto.getStock() != null ? dto.getStock() : 0);
         p.setSubcategoria(null);
 
         return p;

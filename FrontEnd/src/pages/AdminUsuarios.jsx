@@ -13,7 +13,11 @@ export default function AdminUsuarios() {
   const [form, setForm] = useState({ run:'', nombre:'', apellidos:'', email:'', password:'', rol:'Usuario' });
   const [list, setList] = useState([]);
 
-  const load = () => setList(getUsers());
+  // Carga asíncrona
+  const load = async () => {
+    const data = await getUsers();
+    setList(data);
+  };
 
   useEffect(() => {
     load();
@@ -22,14 +26,14 @@ export default function AdminUsuarios() {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  const adminCount = useMemo(() => list.filter(u => u.rol === 'Administrador').length, [list]);
+  const adminCount = useMemo(() => list.filter(u => u.rol === 'ADMIN' || u.rol === 'Administrador').length, [list]);
 
   const onChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const onAdd = (e) => {
+  const onAdd = async (e) => {
     e.preventDefault();
     const payload = {
       run: form.run.trim(),
@@ -37,16 +41,16 @@ export default function AdminUsuarios() {
       apellidos: form.apellidos.trim(),
       email: form.email.trim().toLowerCase(),
       password: form.password,
-      rol: form.rol
+      rol: form.rol === 'Administrador' ? 'ADMIN' : 'CLIENTE' // Traducir rol
     };
     if (!payload.email || !payload.password || !payload.nombre) {
       return Swal.fire('Validación', 'Nombre, correo y contraseña son requeridos', 'warning');
     }
     try {
-      addUser(payload);
+      await addUser(payload);
       setForm({ run:'', nombre:'', apellidos:'', email:'', password:'', rol:'Usuario' });
-      load();
-      Swal.fire('OK','Usuario agregado','success');
+      await load();
+      Swal.fire('OK','Usuario agregado (Simulado)','success');
     } catch (err) {
       Swal.fire('Error', err.message || 'No se pudo agregar', 'error');
     }
@@ -56,7 +60,8 @@ export default function AdminUsuarios() {
     if (u.email === user?.email) {
       return Swal.fire('No permitido','No puedes eliminar tu propia cuenta mientras estás logueado','info');
     }
-    if (u.rol === 'Administrador' && adminCount <= 1) {
+    // Ajuste para contar ADMINs correctamente
+    if ((u.rol === 'ADMIN' || u.rol === 'Administrador') && adminCount <= 1) {
       return Swal.fire('No permitido','Debe existir al menos un Administrador en el sistema','info');
     }
     Swal.fire({
@@ -65,13 +70,13 @@ export default function AdminUsuarios() {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Eliminar'
-    }).then(res => {
+    }).then(async res => {
       if (res.isConfirmed) {
-        deleteUserByEmail(u.email);
+        await deleteUserByEmail(u.email);
         // Si por algún motivo eliminan al logueado (en otra pestaña), cerramos sesión
         if (u.email === user?.email) logout();
-        load();
-        Swal.fire('Eliminado','Usuario eliminado','success');
+        await load();
+        Swal.fire('Eliminado','Usuario eliminado (Simulado)','success');
       }
     });
   };

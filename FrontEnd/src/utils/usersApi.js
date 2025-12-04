@@ -1,35 +1,38 @@
-const KEY = 'usuarios';
+import axios from 'axios';
 
-function read() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
-  }
+const API_URL = "http://localhost:8080/api/v1/usuarios";
+
+// Helper para obtener token (Igual que en productsApi)
+const getAuthConfig = () => {
+    const userStr = sessionStorage.getItem("authUser");
+    if (!userStr) return {};
+    try {
+        const user = JSON.parse(userStr);
+        return { headers: { Authorization: `Bearer ${user.token}` } };
+    } catch (e) { return {}; }
+};
+
+export async function getUsers() {
+    try {
+        // El backend mapea getAllUsuarios a la raíz /, no a /all
+        const response = await axios.get(API_URL, getAuthConfig());
+        return response.data;
+    } catch (error) {
+        console.error("Error obteniendo usuarios:", error);
+        return [];
+    }
 }
 
-function write(arr) {
-  localStorage.setItem(KEY, JSON.stringify(arr));
-  window.dispatchEvent(new StorageEvent('storage', { key: KEY }));
+// --- Funciones Placeholder para no romper AdminUsuarios.jsx ---
+
+export async function addUser(usuario) {
+    // TODO: Conectar con endpoint real de crear usuario (si existiera)
+    console.warn("addUser: Funcionalidad no implementada en backend todavía");
+    // Simulamos éxito para no romper la UI
+    return usuario;
 }
 
-export function getUsers() {
-  return read();
-}
-
-export function addUser(u) {
-  const users = read();
-  const exists = users.some(x => String(x.email).trim().toLowerCase() === String(u.email).trim().toLowerCase());
-  if (exists) throw new Error('El correo ya está registrado.');
-  users.push(u);
-  write(users);
-  return u;
-}
-
-export function deleteUserByEmail(email) {
-  const users = read();
-  const filtered = users.filter(u => String(u.email).trim().toLowerCase() !== String(email).trim().toLowerCase());
-  write(filtered);
+export async function deleteUserByEmail(email) {
+    // TODO: Conectar con endpoint real de borrar por email
+    console.warn("deleteUserByEmail: Funcionalidad no implementada en backend todavía", email);
 }
