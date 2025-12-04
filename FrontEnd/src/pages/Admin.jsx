@@ -5,13 +5,15 @@ import { Card, CardBody, CardTitle, CardText } from '../ui/Card';
 import * as TableNS from '../ui/Table';
 import AdminProductos from './AdminProductos';
 import AdminUsuarios from './AdminUsuarios';
+import { getUsers } from '../utils/usersApi';
+import { getProducts } from '../utils/productsApi';
 
 const TableComp = TableNS.default ?? TableNS.Table;
 
-// helpers seguros para leer localStorage
-function readArray(key) {
+// Helper para leer órdenes (sigue usando localStorage por ahora)
+function readOrders() {
   try {
-    const raw = localStorage.getItem(key);
+    const raw = localStorage.getItem('ordenes');
     const arr = raw ? JSON.parse(raw) : [];
     return Array.isArray(arr) ? arr : [];
   } catch {
@@ -23,32 +25,33 @@ export default function Admin() {
   const { user } = useAuth();
   const [stats, setStats] = useState({ users: 0, products: 0, orders: 0 });
 
-  // carga y recalcula contadores (usuarios reales en localStorage)
-  const recompute = () => {
-    const usuarios = readArray('usuarios');     // ✅ ya existe en tu proyecto
-    const productos = readArray('productos');   // si aún no existe, quedará en 0
-    const ordenes   = readArray('ordenes');     // si aún no existe, quedará en 0
-    setStats({
-      users: usuarios.length,
-      products: productos.length,
-      orders: ordenes.length,
-    });
+  // Carga asíncrona desde Backend
+  const recompute = async () => {
+    try {
+        // Ejecutamos las peticiones en paralelo
+        const [usuariosReal, productosReal] = await Promise.all([
+            getUsers(),
+            getProducts()
+        ]);
+        
+        const ordenes = readOrders(); // Mock por ahora
+
+        setStats({
+          users: usuariosReal.length,
+          products: productosReal.length,
+          orders: ordenes.length,
+        });
+    } catch (error) {
+        console.error("Error cargando estadísticas:", error);
+    }
   };
 
   useEffect(() => {
     recompute();
-
-    // si cambia localStorage desde otra pestaña, nos actualizamos
-    const onStorage = (e) => {
-      if (['usuarios', 'productos', 'ordenes'].includes(e.key)) {
-        recompute();
-      }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  if (!user || user.rol !== 'Administrador') {
+  // Validación de Rol (Acepta 'Administrador' legacy o 'ADMIN' backend)
+  if (!user || (user.rol !== 'Administrador' && user.rol !== 'ADMIN')) {
     return (
       <main className="container py-5">
         <Alert variant="danger">Acceso restringido. Debes ser Administrador.</Alert>
@@ -62,7 +65,7 @@ export default function Admin() {
     { title: 'Órdenes',   value: stats.orders,   desc: 'Hoy' },
   ];
 
-  const orders = readArray('ordenes'); // usa tus datos si los guardas; si no, quedará vacío
+  const orders = readOrders();
 
   return (
     <main className="container py-5">
@@ -109,8 +112,10 @@ export default function Admin() {
           )}
         </tbody>
       </TableComp>
-        <AdminProductos />
-        <AdminUsuarios />
+
+      {/* Componentes CRUD de Productos y Usuarios */}
+      <AdminProductos />
+      <AdminUsuarios />
     </main>
   );
 }

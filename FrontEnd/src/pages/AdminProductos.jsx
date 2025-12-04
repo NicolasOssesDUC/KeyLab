@@ -11,10 +11,15 @@ export default function AdminProductos() {
   const [form, setForm] = useState({ nombre: '', categoria: '', precio: '', stock: '' });
   const [list, setList] = useState([]);
 
-  const load = () => setList(getProducts());
+  // Carga asíncrona
+  const load = async () => {
+    const data = await getProducts();
+    setList(data);
+  };
 
   useEffect(() => {
     load();
+    // El evento storage ya no es necesario, pero fdejamos por siacaso
     const onStorage = (e) => { if (e.key === 'productos') load(); };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
@@ -25,7 +30,7 @@ export default function AdminProductos() {
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const onAdd = (e) => {
+  const onAdd = async (e) => {
     e.preventDefault();
     const nombre = form.nombre.trim();
     const categoria = form.categoria.trim();
@@ -36,10 +41,14 @@ export default function AdminProductos() {
     if (!categoria) return Swal.fire('Validación','La categoría es requerida','warning');
     if (!Number.isFinite(precio) || precio <= 0) return Swal.fire('Validación','Precio inválido','warning');
 
-    addProduct({ nombre, categoria, precio, stock });
-    setForm({ nombre: '', categoria: '', precio: '', stock: '' });
-    load();
-    Swal.fire('OK','Producto agregado','success');
+    try {
+      await addProduct({ nombre, categoria, precio, stock });
+      setForm({ nombre: '', categoria: '', precio: '', stock: '' });
+      await load(); // Recargar lista DESPUES de agregar
+      Swal.fire('OK','Producto agregado','success');
+    } catch (error) {
+      Swal.fire('Error','No se pudo agregar el producto','error');
+    }
   };
 
   const onDelete = (id) => {
@@ -49,11 +58,15 @@ export default function AdminProductos() {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Eliminar'
-    }).then(res => {
+    }).then(async res => {
       if (res.isConfirmed) {
-        deleteProduct(id);
-        load();
-        Swal.fire('Eliminado','El producto fue eliminado','success');
+        try {
+          await deleteProduct(id);
+          await load(); // Recargar lista DESPUES de borrar
+          Swal.fire('Eliminado','El producto fue eliminado','success');
+        } catch (error) {
+          Swal.fire('Error','No se pudo eliminar','error');
+        }
       }
     });
   };

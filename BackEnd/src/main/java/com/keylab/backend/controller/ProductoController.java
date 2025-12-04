@@ -3,12 +3,14 @@ package com.keylab.backend.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.keylab.backend.model.dto.ProductoCreateDTO;
 import com.keylab.backend.model.dto.ProductoResponseDTO;
 import com.keylab.backend.model.dto.ProductoUpdateDTO;
 import com.keylab.backend.service.ProductoService;
+
 
 @RestController
 @RequestMapping("/api/v1/productos")
@@ -36,20 +38,23 @@ public class ProductoController {
         return productoService.getProductoById(id);
     }
 
-    // Crear producto
+    // Crear producto (SOLO ADMIN)
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ProductoResponseDTO createProducto(@RequestBody ProductoCreateDTO productoDTO) {
         return productoService.createProducto(productoDTO);
     }
 
-    // Actualizar producto
+    // Actualizar producto (SOLO ADMIN)
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ProductoResponseDTO updateProducto(@PathVariable Long id, @RequestBody ProductoUpdateDTO productoDTO) {
         return productoService.updateProducto(id, productoDTO);
     }
 
-    // Eliminar producto
+    // Eliminar producto (SOLO ADMIN)
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteProducto(@PathVariable Long id) {
         productoService.deleteProducto(id);
     }
