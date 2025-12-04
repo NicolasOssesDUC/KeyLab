@@ -3,18 +3,27 @@ import ProductGrid from "../components/ProductGrid";
 import { useEffect, useState } from "react";
 import ListaCategoricaDinamica from "../components/ListaCategoricaDinamica";
 
+// importar funciones del servicio
+import { getProducts } from "../utils/productsApi";
+
 function Cases() {
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/productos")
-      .then((res) => res.json())
-      .then((data) => {
-        // Filtrar por categoría en el frontend
-        setCases(data.filter((p) => p.categoria === "Cases"));
-      })
-      .finally(() => setLoading(false));
+    async function loadCases() {
+      try {
+        const data = await getProducts(); // obtiene TODOS los productos
+        const filtrados = data.filter((p) => p.categoria === "Cases"); // filtra por categoría
+        setCases(filtrados);
+      } catch (e) {
+        console.error("Error cargando cases:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadCases();
   }, []);
 
   return (

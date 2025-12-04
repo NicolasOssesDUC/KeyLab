@@ -3,18 +3,27 @@ import ProductGrid from "../components/ProductGrid";
 import { useEffect, useState } from "react";
 import ListaCategoricaDinamica from "../components/ListaCategoricaDinamica";
 
+// Importar servicio de productos
+import { getProducts } from "../utils/productsApi";
+
 function Keycaps() {
   const [keycaps, setKeycaps] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/productos")
-      .then((res) => res.json())
-      .then((data) => {
-        // Filtrar en el frontend igual que en las demás categorías
-        setKeycaps(data.filter((p) => p.categoria === "Keycaps"));
-      })
-      .finally(() => setLoading(false));
+    async function loadKeycaps() {
+      try {
+        const data = await getProducts(); // obtiene todos los productos
+        const filtrados = data.filter((p) => p.categoria === "Keycaps");
+        setKeycaps(filtrados);
+      } catch (error) {
+        console.error("Error cargando keycaps:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadKeycaps();
   }, []);
 
   return (
