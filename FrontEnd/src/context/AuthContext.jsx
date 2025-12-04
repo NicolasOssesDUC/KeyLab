@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { loginRequest } from '../utils/authApi'; // 👈 IMPORTANTE: habla con el backend
+import { loginRequest, registerRequest } from '../utils/authApi'; // 👈 IMPORTANTE: habla con el backend
 
 // Contexto principal
 const AuthContext = createContext(null);
@@ -43,18 +43,11 @@ export function AuthProvider({ children }) {
     return data;   // 👈 Login.jsx usa esto para decidir a dónde redirigir
   };
 
-  // (por ahora) Registro de nuevo usuario sigue usando localStorage
-  // Luego lo podemos cambiar para que también use el backend (/api/auth/register)
-  const register = (usuario) => {
-    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-    const exists = usuarios.some(
-      (u) => String(u.email).trim() === String(usuario.email).trim()
-    );
-    if (exists) return null;
-    usuarios.push(usuario);
-    localStorage.setItem('usuarios', JSON.stringify(usuarios));
-    setUser(usuario);
-    return usuario;
+  //registro real
+  const register = async (usuarioData) => {
+    const data = await registerRequest(usuarioData);
+    setUser(data);
+    return data;
   };
 
   // Cerrar sesión
