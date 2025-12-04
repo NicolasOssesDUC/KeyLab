@@ -57,7 +57,7 @@ function Registro() {
     setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newErrors = {};
@@ -66,22 +66,22 @@ function Registro() {
 
     if (Object.values(newErrors).some(Boolean)) return;
 
-    const success = register({
-      run: form.run.trim(),
-      nombre: form.nombre.trim(),
-      apellidos: form.apellidos.trim(),
-      email: form.email.trim(),
-      password: form.password.trim(),
-      rol: 'Empleado',
-    });
-
-    if (!success) {
-      alert('El correo ya está registrado.');
-      return;
+    try {
+      await register({
+        nombre: form.nombre.trim(),
+        apellido: form.apellidos.trim(),
+        email: form.email.trim(),
+        password: form.password.trim(),
+        telefono: "99999999",
+        fechaNacimiento: "2000-01-01"
+      });
+      
+      alert('Registro exitoso. ¡Bienvenido!');
+      navigate('/');
+    } catch (error) {
+      console.error("Error registro:", error);
+      alert('Error al registrar: ' + error.message);
     }
-
-    alert('Registro exitoso. ¡Bienvenido!');
-    navigate('/login');
   };
 
   return (

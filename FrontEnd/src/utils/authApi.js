@@ -21,3 +21,23 @@ export async function loginRequest(email, password) {
   // Debería devolver: { token, email, rol, ... }
   return await response.json();
 }
+
+export async function registerRequest(usuario) {
+  // nombre, apellido, email, password,telefono, fecha nacimiento(anadir direccion en futuro (hay que editar el dto))
+  const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+  
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(usuario),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Error al registrar el usuario");
+  }
+
+  //token, email, rol ....
+  return await response.json();
+}
