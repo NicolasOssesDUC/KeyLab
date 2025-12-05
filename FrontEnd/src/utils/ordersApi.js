@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
 
@@ -53,3 +54,28 @@ if (token && verificarTokenExpirado(token)) {
 
   return response.json();
 }
+=======
+import axios from 'axios';
+
+const API_URL = "http://localhost:8080/api/v1/ordenes";
+
+const getAuthConfig = () => {
+    const userStr = sessionStorage.getItem("authUser");
+    if (!userStr) return {};
+    try {
+        const user = JSON.parse(userStr);
+        return { headers: { Authorization: `Bearer ${user.token}` } };
+    } catch (e) { return {}; }
+};
+
+// Obtener todas las órdenes (Admin)
+export async function getOrders() {
+    try {
+        const response = await axios.get(API_URL, getAuthConfig());
+        return response.data;
+    } catch (error) {
+        console.error("Error obteniendo órdenes:", error);
+        return [];
+    }
+}
+>>>>>>> 7c65af4c5d04dfaf9d7969ab5d99cd04ef986589

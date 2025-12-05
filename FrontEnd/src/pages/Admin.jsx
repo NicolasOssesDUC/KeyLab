@@ -5,50 +5,42 @@ import { Card, CardBody, CardTitle, CardText } from '../ui/Card';
 import * as TableNS from '../ui/Table';
 import AdminProductos from './AdminProductos';
 import AdminUsuarios from './AdminUsuarios';
+import { getUsers } from '../utils/usersApi';
+import { getProducts } from '../utils/productsApi';
+import { getOrders } from '../utils/ordersApi'; // Nuevo import
 
 const TableComp = TableNS.default ?? TableNS.Table;
-
-// helpers seguros para leer localStorage
-function readArray(key) {
-  try {
-    const raw = localStorage.getItem(key);
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
-  }
-}
 
 export default function Admin() {
   const { user } = useAuth();
   const [stats, setStats] = useState({ users: 0, products: 0, orders: 0 });
+  const [recentOrders, setRecentOrders] = useState([]); // Estado para la tabla
 
-  // carga y recalcula contadores (usuarios reales en localStorage)
-  const recompute = () => {
-    const usuarios = readArray('usuarios');     // ✅ ya existe en tu proyecto
-    const productos = readArray('productos');   // si aún no existe, quedará en 0
-    const ordenes   = readArray('ordenes');     // si aún no existe, quedará en 0
-    setStats({
-      users: usuarios.length,
-      products: productos.length,
-      orders: ordenes.length,
-    });
+  const recompute = async () => {
+    try {
+        const [usuariosReal, productosReal, ordenesReal] = await Promise.all([
+            getUsers(),
+            getProducts(),
+            getOrders()
+        ]);
+        
+        setStats({
+          users: usuariosReal.length,
+          products: productosReal.length,
+          orders: ordenesReal.length,
+        });
+
+        setRecentOrders(ordenesReal); // Actualizar tabla de órdenes
+    } catch (error) {
+        console.error("Error cargando estadísticas:", error);
+    }
   };
 
   useEffect(() => {
     recompute();
-
-    // si cambia localStorage desde otra pestaña, nos actualizamos
-    const onStorage = (e) => {
-      if (['usuarios', 'productos', 'ordenes'].includes(e.key)) {
-        recompute();
-      }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  if (!user || user.rol !== 'Administrador') {
+  if (!user || (user.rol !== 'Administrador' && user.rol !== 'ADMIN')) {
     return (
       <main className="container py-5">
         <Alert variant="danger">Acceso restringido. Debes ser Administrador.</Alert>
@@ -59,10 +51,8 @@ export default function Admin() {
   const widgets = [
     { title: 'Usuarios',  value: stats.users,    desc: 'Registrados en el sistema' },
     { title: 'Productos', value: stats.products, desc: 'Activos' },
-    { title: 'Órdenes',   value: stats.orders,   desc: 'Hoy' },
+    { title: 'Órdenes',   value: stats.orders,   desc: 'Totales' },
   ];
-
-  const orders = readArray('ordenes'); // usa tus datos si los guardas; si no, quedará vacío
 
   return (
     <main className="container py-5">
@@ -91,26 +81,27 @@ export default function Admin() {
       <TableComp striped hover responsive className="mt-2">
         <thead>
           <tr>
-            <th>#</th><th>Cliente</th><th>Total</th><th>Estado</th>
+            <th>#</th><th>Total</th><th>Estado</th><th>Fecha</th>
           </tr>
         </thead>
         <tbody>
-          {orders.length === 0 ? (
+          {recentOrders.length === 0 ? (
             <tr><td colSpan={4} className="text-center text-muted">Sin órdenes</td></tr>
           ) : (
-            orders.map(o => (
+            recentOrders.slice(0, 5).map(o => ( // Mostrar solo las últimas 5
               <tr key={o.id}>
                 <td>{o.id}</td>
-                <td>{o.cliente}</td>
                 <td>${(o.total ?? 0).toLocaleString('es-CL')}</td>
-                <td>{o.estado ?? '—'}</td>
+                <td><span className="badge bg-info text-dark">{o.estado ?? 'PENDIENTE'}</span></td>
+                <td>{new Date(o.fecha).toLocaleDateString()}</td>
               </tr>
             ))
           )}
         </tbody>
       </TableComp>
-        <AdminProductos />
-        <AdminUsuarios />
+
+      <AdminProductos />
+      <AdminUsuarios />
     </main>
   );
 }

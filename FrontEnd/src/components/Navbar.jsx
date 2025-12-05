@@ -40,9 +40,9 @@ function Navbar() {
               Ubicación
             </Nav.Link>
 
-            {user?.rol === 'Administrador' && (
-                <Nav.Link as={Link} to="/admin" className="nav-link">
-                  Panel de control
+            {(user?.rol === 'ADMIN' || user?.rol === 'Administrador') && (
+                <Nav.Link as={Link} to="/admin" className="nav-link text-warning fw-bold">
+                  Panel Admin
                   </Nav.Link>
                   )}
                   {user ? (
