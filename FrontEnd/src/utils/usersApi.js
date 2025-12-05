@@ -2,7 +2,6 @@ import axios from 'axios';
 
 const API_URL = "http://localhost:8080/api/v1/usuarios";
 
-// Helper para obtener token (Igual que en productsApi)
 const getAuthConfig = () => {
     const userStr = sessionStorage.getItem("authUser");
     if (!userStr) return {};
@@ -14,7 +13,6 @@ const getAuthConfig = () => {
 
 export async function getUsers() {
     try {
-        // El backend mapea getAllUsuarios a la raíz /, no a /all
         const response = await axios.get(API_URL, getAuthConfig());
         return response.data;
     } catch (error) {
@@ -23,16 +21,24 @@ export async function getUsers() {
     }
 }
 
-// --- Funciones Placeholder para no romper AdminUsuarios.jsx ---
-
 export async function addUser(usuario) {
-    // TODO: Conectar con endpoint real de crear usuario (si existiera)
-    console.warn("addUser: Funcionalidad no implementada en backend todavía");
-    // Simulamos éxito para no romper la UI
-    return usuario;
+    // Llama a POST /api/v1/usuarios
+    // El backend espera UsuarioRegisterDTO (con campo 'rol')
+    try {
+        const response = await axios.post(API_URL, usuario, getAuthConfig());
+        return response.data;
+    } catch (error) {
+        console.error("Error creando usuario:", error);
+        throw error;
+    }
 }
 
-export async function deleteUserByEmail(email) {
-    // TODO: Conectar con endpoint real de borrar por email
-    console.warn("deleteUserByEmail: Funcionalidad no implementada en backend todavía", email);
+export async function deleteUserById(id) {
+    // Llama a DELETE /api/v1/usuarios/{id}
+    try {
+        await axios.delete(`${API_URL}/${id}`, getAuthConfig());
+    } catch (error) {
+        console.error("Error eliminando usuario:", error);
+        throw error;
+    }
 }
