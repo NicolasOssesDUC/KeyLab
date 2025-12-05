@@ -11,11 +11,16 @@ import com.keylab.backend.model.dto.UsuarioRegisterDTO;
 import com.keylab.backend.model.dto.UsuarioResponseDTO;
 import com.keylab.backend.repository.UsuarioRepository;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 @Service
 public class UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // ---------- MÉTODOS USADOS POR EL CONTROLLER ----------
 
@@ -59,11 +64,18 @@ public class UsuarioService {
         usuario.setTelefono(registroDTO.getTelefono());
         usuario.setFechaNacimiento(registroDTO.getFechaNacimiento());
 
-        // Password (simple para la pauta; en real, encriptar)
-        usuario.setPasswordHash(registroDTO.getPassword());
+        // Password ENCRIPTADA
+        String encodedPass = passwordEncoder.encode(registroDTO.getPassword());
+        usuario.setPassword(encodedPass);
+        usuario.setPasswordHash(encodedPass); // Legacy
 
-        // Rol y activo por defecto
-        usuario.setRol("CLIENTE");
+        // Rol (Desde DTO o por defecto)
+        if (registroDTO.getRol() != null && !registroDTO.getRol().isBlank()) {
+            usuario.setRol(registroDTO.getRol());
+        } else {
+            usuario.setRol("CLIENTE");
+        }
+        
         usuario.setActivo(true);
 
         Usuario guardado = usuarioRepository.save(usuario);

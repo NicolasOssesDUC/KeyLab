@@ -11,6 +11,6 @@ public class UsuarioRegisterDTO {
     private String apellido;
     private String telefono;
     private LocalDate fechaNacimiento;
-    
+    private String rol; // Opcional, solo para Admin
 }
 
