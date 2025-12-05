@@ -21,6 +21,8 @@ import com.keylab.backend.repository.OrdenRepository;
 import com.keylab.backend.repository.ProductoRepository;
 import com.keylab.backend.repository.UsuarioRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class OrdenService {
 
@@ -75,36 +77,48 @@ public class OrdenService {
     // ============================================================
     //                      CREAR ORDEN MANUAL
     // ============================================================
-
+    @Transactional
     public OrdenResponseDTO createOrden(OrdenCreateDTO dto) {
 
-        Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + dto.getUsuarioId()));
+    Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + dto.getUsuarioId()));
 
-        Orden orden = new Orden();
-        orden.setId(null);
-        orden.setUsuario(usuario);
+    Orden orden = new Orden();
+    orden.setId(null);
+    orden.setUsuario(usuario);
 
-        orden.setNumeroOrden("ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
-        orden.setEstado("PENDIENTE");
+    orden.setNumeroOrden("ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+    orden.setEstado("PENDIENTE");
 
-        orden.setDescuento(0.0);
-        orden.setCostoEnvio(0.0);
+    orden.setDescuento(0.0);
+    orden.setCostoEnvio(0.0);
 
-        // ------ mapear items ------
-        List<OrdenItem> items = new ArrayList<>();
-        if (dto.getItems() != null) {
-            for (OrdenItemCreateDTO itemDto : dto.getItems()) {
-                items.add(toOrdenItemEntity(itemDto, orden));
-            }
+    // ------ mapear items ------
+    List<OrdenItem> items = new ArrayList<>();
+    if (dto.getItems() != null) {
+        for (OrdenItemCreateDTO itemDto : dto.getItems()) {
+            items.add(toOrdenItemEntity(itemDto, orden));
+        }
+    }
+
+    // 🔥 DESCONTAR STOCK ANTES DE GUARDAR LA ORDEN
+    for (OrdenItem item : items) {
+        Producto producto = item.getProducto();
+
+        if (producto.getStock() < item.getCantidad()) {
+            throw new RuntimeException("Stock insuficiente para el producto: " + producto.getNombre());
         }
 
-        orden.setItems(items);
-
-        Orden guardada = ordenRepository.save(orden);
-
-        return toResponseDTO(guardada);
+        producto.setStock(producto.getStock() - item.getCantidad());
+        productoRepository.save(producto);
     }
+
+    orden.setItems(items);
+
+    Orden guardada = ordenRepository.save(orden);
+
+    return toResponseDTO(guardada);
+}
 
     // ============================================================
     //              CREAR ORDEN AUTOGENERADA DESDE CARRITO
