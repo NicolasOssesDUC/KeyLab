@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, FormField, Button, Alert } from '../ui';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import { checkoutOrden } from '../utils/ordersApi';
 import Swal from 'sweetalert2';
 
 function SimuladorPago() {
   const navigate = useNavigate();
   const { cart, getTotalPrice, clearCartSilent } = useCart();
+  const { user } = useAuth();
   
   const [formData, setFormData] = useState({
     nombreTitular: '',
@@ -57,6 +60,7 @@ function SimuladorPago() {
     if (!/^\d{16}$/.test(numeroLimpio)) {
       newErrors.numeroTarjeta = 'El número de tarjeta debe tener 16 dígitos';
     }
+    
 
     // Fecha de expiración (formato MM/YY)
     if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(formData.fechaExpiracion)) {

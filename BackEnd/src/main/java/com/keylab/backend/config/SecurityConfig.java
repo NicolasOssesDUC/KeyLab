@@ -29,11 +29,14 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 //  Rutas públicas: auth, productos (catálogo), swagger
                 .requestMatchers(
-                    "/api/auth/**",
-                    "/api/v1/productos/**",
-                    "/v3/api-docs/**",
-                    "/swagger-ui/**",
-                    "/swagger-ui.html"
+                "/api/auth/**",           // login / register por JWT (si lo usas)
+                "/api/v1/usuarios/**",    // 👈 usuarios públicos para pruebas
+                "/api/v1/productos/**",   // productos públicos
+                "/api/v1/ordenes/**",     // órdenes (para testear stock)
+                "/api/v1/carrito/**",     // carrito
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html"
                 ).permitAll()
                 // (Opcional) permitir registro de usuarios sin token:
                 // .requestMatchers(HttpMethod.POST, "/api/v1/usuarios").permitAll()
